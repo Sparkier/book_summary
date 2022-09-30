@@ -34,6 +34,8 @@ def generate_image_from_text(model, output_dir, text, book_title, level, paragra
 def iterate_level(mode, output_dir, book_title, level, content_in_level):
     for paragraph_idx, paragraph in enumerate(content_in_level):
         for sentence_idx, sentence in enumerate(re.split('[.?]', paragraph)):
+            if not to_safe_filename(sentence):
+                continue
             generate_image_from_text(model, output_dir, sentence, book_title, level, paragraph_idx, sentence_idx)
 
 
