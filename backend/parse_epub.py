@@ -29,4 +29,4 @@ def parse_epub(path):
     epub_chapters = [item for item in items if item.is_chapter()]
     chapters = [parse_chapter(ch_num, chapter) for ch_num, chapter in enumerate(epub_chapters)]        
 
-    return {"title": book.get_metadata('DC', 'title')[0], "chapters": chapters}
+    return {"book": {"title": book.get_metadata('DC', 'title')[0][0], "chapters": chapters}}

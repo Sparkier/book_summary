@@ -7,27 +7,31 @@ from pathlib import Path
 import keras_cv
 from PIL import Image
 
+from parse_epub import parse_epub
+
 
 def to_safe_filename(string):
     return "".join([c for c in string if c.isalpha() or c.isdigit() or c==' ']).rstrip()
 
 
 def parse_json(file_name):
-    with open(file_name) as f:
+    with open(file_name, encoding="utf8") as f:
         return json.load(f)
 
 
-def generate_image_from_text(model, output_dir, text, book_title, level, paragraph_idx, sentence_idx):
-    print(book_title, level, paragraph_idx, sentence_idx)
-    output_dir = Path(output_dir / to_safe_filename(book_title) / level)
+def generate_image_from_text(model, output_dir, text, book_title, chapter, paragraph_idx, sentence_idx):
+    print(book_title, chapter, paragraph_idx, sentence_idx)
+    output_dir = Path(output_dir / to_safe_filename(book_title) / str(chapter))
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print("Generating image for text:", text)
-
-    generated_images = model.text_to_image(text, batch_size=1)
+    # Model does not support more than 77 tokens
+    max_length = 77
+    generated_images = model.text_to_image(text[:max_length], batch_size=1)
     im = Image.fromarray(generated_images[0])
-
-    file_name = output_dir / f"{paragraph_idx}-{sentence_idx}-{to_safe_filename(text)}.png"
+    # Windows does not support too long filenames
+    file_name_max_length = 250
+    file_name = output_dir / f"{paragraph_idx}-{sentence_idx}-{to_safe_filename(text[:file_name_max_length])}.png"
     im.save(file_name)
 
 
@@ -40,18 +44,22 @@ def iterate_level(mode, output_dir, book_title, level, content_in_level):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Json to images')
-    parser.add_argument('--input_file', type=str, help='input json file')
+    parser = argparse.ArgumentParser(description='Book to images')
+    parser.add_argument('--input_file', type=str, help='input json/epub file')
     parser.add_argument('--output_dir', type=str, help='output dir')
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    book_content = parse_json(Path(args.input_file))
+    input_file = Path(args.input_file)
+    if input_file.suffix == ".json":
+        book_content = parse_json(input_file)
+    elif input_file.suffix == ".epub":
+        book_content = parse_epub(input_file)
     book = book_content["book"]
 
     model = keras_cv.models.StableDiffusion(img_width=512, img_height=512)
 
-    for level in ["1"]:
-        iterate_level(model, output_dir, book["title"], level, book[level])
+    for chapter in [0]:
+        iterate_level(model, output_dir, book["title"], chapter, book["chapters"][chapter]["paragraphs"])
