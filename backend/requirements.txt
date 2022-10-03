@@ -1,3 +1,5 @@
+torch
+transformers
 ebooklib
 bs4
 absl-py==1.2.0
