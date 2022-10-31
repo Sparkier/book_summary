@@ -84,7 +84,7 @@ if __name__ == '__main__':
         iterate_level(diffusion_model, Path(book_dir, "chapters", str(ch_num),
                       "paragraph_summaries"), chapter["paragraph_summaries"])
         iterate_level(diffusion_model, Path(book_dir, "chapters", str(ch_num),
-                      "chapter_summary"), chapter["chapter_summary"])
+                      "chapter_summary"), [chapter["chapter_summary"]])
 
     iterate_level(diffusion_model, Path(book_dir, "book_summary"),
                   [book["book_summary"]])
