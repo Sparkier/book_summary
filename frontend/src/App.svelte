@@ -1,15 +1,16 @@
 <script lang="ts">
-  import { fade } from "svelte/transition";
-  import SummaryElement from "./components/SummaryElement.svelte";
-  import Dropdown from "./elements/Dropdown.svelte";
+  import ImageComponent from "./components/ImageComponent.svelte";
+  import SummaryContainer from "./components/SummaryContainer.svelte";
+  import TextComponent from "./components/TextComponent.svelte";
   import Heading from "./elements/Heading.svelte";
-  import * as book from "./texts/alice.json";
+  import * as book from "./texts/alice_summarized.json";
 
-  $: keys = Object.keys(book.book);
-  $: levels = removeItem([...keys], "title");
-  $: texts = book.book[level];
+  $: title = book.book["title"];
+  $: chapters = book.book["chapters"];
+  $: paragraphs = chapters[selectedChapter]["paragraphs"];
+  $: paragraph_summaries = chapters[selectedChapter]["paragraph_summaries"];
 
-  let level = "0";
+  let selectedChapter = 0;
 
   function removeItem<T>(arr: Array<T>, value: T): Array<T> {
     const index = arr.indexOf(value);
@@ -18,19 +19,35 @@
     }
     return arr;
   }
+  function rstrip(x: string) {
+        // This implementation removes whitespace from the right side
+        // of the input string.
+        return x.replace(/\s+$/gm, '');
+    }
+
+    function to_safe_filename(filename: string) {
+        return rstrip(filename.substring(0, 250).replace(/[^a-z0-9 ]/gi, ''))
+    }
 </script>
 
 <main>
   <div class="flex flex-col">
-    <Heading heading={book.book["title"]} />
+    <Heading heading={title} />
     <div class="p-2">
-      <Dropdown items={levels} bind:value={level} />
-    </div>
-    {#each texts as text (text)}
-      <div transition:fade>
-        <SummaryElement {text} />
+      <select bind:value={selectedChapter}>
+        {#each chapters as chapter, i}
+          <option value={i}>
+            {chapter["title"]}
+          </option>
+        {/each}
+      </select>
+      <div class="flex flex-row">
+        <ImageComponent src={'./books/' + to_safe_filename(title) + "/chapters/" + (selectedChapter+1) + "/chapter_summary/0-" + to_safe_filename(chapters[selectedChapter]["chapter_summary"]) + ".png"} />
+        <TextComponent text={chapters[selectedChapter]["chapter_summary"]} />
       </div>
-    {/each}
+    </div>
+    <Heading heading="Paragraphs" />
+    <SummaryContainer path={'./books/' + to_safe_filename(title) + "/chapters/" + (selectedChapter+1) + '/paragraph_summaries/'} texts={paragraphs} summaries={paragraph_summaries}></SummaryContainer>
   </div>
 </main>
 

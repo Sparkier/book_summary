@@ -1,6 +1,10 @@
-<div class="flex-grow">
+<script lang="ts">
+  export let src: string;
+</script>
+
+<div>
   <img
-    src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/2560px-Image_created_with_a_mobile_phone.png"
+    src={src}
     alt="Summary of the text next to it."
     class={`m-1 w-48`}
   />
