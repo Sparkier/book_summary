@@ -1,36 +1,45 @@
 <script lang="ts">
-    import SummaryElement from "./SummaryElement.svelte";
-    import { fade } from "svelte/transition";
-    export let path: string;
-    export let texts: string[];
-    export let summaries: string[];
-    function rstrip(x: string) {
-        // This implementation removes whitespace from the right side
-        // of the input string.
-        return x.replace(/\s+$/gm, '');
-    }
+  import SubHeading from "../elements/SubHeading.svelte";
+  import BookLevel from "./levels/BookLevel.svelte";
+  import ChapterLevel from "./levels/ChapterLevel.svelte";
+  import ParagraphLevel from "./levels/ParagraphLevel.svelte";
+  import FullLevel from "./levels/FullLevel.svelte";
 
-    function to_safe_filename(filename: string) {
-        return rstrip(filename.substring(0, 250).replace(/[^a-z0-9 ]/gi, ''))
-    }
-  </script>
-  <style>
-.flex-container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-.flex-item {
-  max-width:200px;
-  margin: 0.25em;
-}
-  </style>
-  <div class="flex-container">
-{#each texts as text, i}
-      <div transition:fade>
-        <div class="flex-item">
-            <SummaryElement text={text} summary={summaries[i]} image={path + i + "-" + to_safe_filename(summaries[i]) + '.png'} />
-        </div>
-    </div>
-{/each}
+  import type { Book } from "../types";
+  import { AbstractionLevel } from "../types";
+
+  export let book: Book;
+  export let selectedBook: string;
+  export let abstractionLevel: AbstractionLevel;
+</script>
+
+<div class="flex flex-col overflow-auto">
+  {#if abstractionLevel === AbstractionLevel.BOOK}
+    <BookLevel {book} {selectedBook} />
+  {:else}
+    {#each book.chapters as chapter, chapterIndex}
+      <SubHeading heading={chapter["title"]} />
+      {#if abstractionLevel === AbstractionLevel.CHAPTER}
+        <ChapterLevel {selectedBook} {chapterIndex} {chapter} />
+      {:else if abstractionLevel === AbstractionLevel.PARAGRAPH}
+        {#each chapter.paragraph_summaries as paragraphSummary, paragraphIndex}
+          <ParagraphLevel
+            {selectedBook}
+            {chapterIndex}
+            {paragraphSummary}
+            {paragraphIndex}
+          />
+        {/each}
+      {:else}
+        {#each chapter.paragraphs as paragraph, paragraphIndex}
+          <FullLevel
+            {selectedBook}
+            {chapterIndex}
+            {paragraph}
+            {paragraphIndex}
+          />
+        {/each}
+      {/if}
+    {/each}
+  {/if}
 </div>
