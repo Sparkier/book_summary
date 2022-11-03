@@ -1,36 +1,38 @@
 <script lang="ts">
-  import { fade } from "svelte/transition";
-  import SummaryElement from "./components/SummaryElement.svelte";
-  import Dropdown from "./elements/Dropdown.svelte";
+  import SummaryContainer from "./components/SummaryContainer.svelte";
   import Heading from "./elements/Heading.svelte";
-  import * as book from "./texts/alice.json";
+  import { AbstractionLevel } from "./types";
 
-  $: keys = Object.keys(book.book);
-  $: levels = removeItem([...keys], "title");
-  $: texts = book.book[level];
+  let selectedBook = "alice";
+  $: fetchJson = fetch(`books/${selectedBook}/summarized.json`).then((res) =>
+    res.json()
+  );
 
-  let level = "0";
-
-  function removeItem<T>(arr: Array<T>, value: T): Array<T> {
-    const index = arr.indexOf(value);
-    if (index > -1) {
-      arr.splice(index, 1);
-    }
-    return arr;
-  }
+  let abstractionLevel = AbstractionLevel.BOOK;
 </script>
 
-<main>
-  <div class="flex flex-col">
-    <Heading heading={book.book["title"]} />
-    <div class="p-2">
-      <Dropdown items={levels} bind:value={level} />
-    </div>
-    {#each texts as text (text)}
-      <div transition:fade>
-        <SummaryElement {text} />
+<main class="overflow-hidden h-full">
+  <div class="flex flex-col h-full">
+    {#await fetchJson}
+      Loading book.
+    {:then book}
+      <Heading heading={book["title"]} />
+      <div class="py-2">
+        <div class="flex">
+          <p class="pr-2">Abstraction Level:</p>
+          <select bind:value={abstractionLevel}>
+            {#each Object.values(AbstractionLevel) as abstractionLevel}
+              <option value={abstractionLevel}>
+                {abstractionLevel}
+              </option>
+            {/each}
+          </select>
+        </div>
       </div>
-    {/each}
+      <SummaryContainer {book} {selectedBook} {abstractionLevel} />
+    {:catch}
+      Book could not be loaded.
+    {/await}
   </div>
 </main>
 
