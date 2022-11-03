@@ -11,7 +11,5 @@
 
 <SummaryElement
   text={chapter.chapter_summary}
-  image={`books/${selectedBook}/chapters/${
-    chapterIndex + 1
-  }/chapter_summary/0-${toSafeFilename(`${chapter.chapter_summary}`)}.png`}
+  image={`http://127.0.0.1:5000/api/get_chapter_summary_image/${selectedBook}/${chapterIndex + 1}/0`}
 />

@@ -10,7 +10,5 @@
 
 <SummaryElement
   text={book.book_summary}
-  image={`books/${selectedBook}/book_summary/0-${toSafeFilename(
-    `${book.book_summary}`
-  )}.png`}
+  image={`http://127.0.0.1:5000/api/get_book_summary_image/${selectedBook}`}
 />
