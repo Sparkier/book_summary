@@ -1,9 +1,6 @@
 <script lang="ts">
   import SubHeading from "../elements/SubHeading.svelte";
-  import BookLevel from "./levels/BookLevel.svelte";
-  import ChapterLevel from "./levels/ChapterLevel.svelte";
-  import ParagraphLevel from "./levels/ParagraphLevel.svelte";
-  import FullLevel from "./levels/FullLevel.svelte";
+  import SummaryElement from "./SummaryElement.svelte";
 
   import type { Book } from "../types";
   import { AbstractionLevel } from "../types";
@@ -15,28 +12,36 @@
 
 <div class="flex flex-col overflow-auto">
   {#if abstractionLevel === AbstractionLevel.BOOK}
-    <BookLevel {book} {selectedBook} />
+    <SummaryElement
+      text={book.book_summary}
+      image={`/api/get_book_summary_image/${selectedBook}`}
+    />
   {:else}
     {#each book.chapters as chapter, chapterIndex}
       <SubHeading heading={chapter["title"]} />
       {#if abstractionLevel === AbstractionLevel.CHAPTER}
-        <ChapterLevel {selectedBook} {chapterIndex} {chapter} />
+        <SummaryElement
+          text={chapter.chapter_summary}
+          image={`/api/get_chapter_summary_image/${selectedBook}/${
+            chapterIndex + 1
+          }/0`}
+        />
       {:else if abstractionLevel === AbstractionLevel.PARAGRAPH}
         {#each chapter.paragraph_summaries as paragraphSummary, paragraphIndex}
-          <ParagraphLevel
-            {selectedBook}
-            {chapterIndex}
-            {paragraphSummary}
-            {paragraphIndex}
+          <SummaryElement
+            text={paragraphSummary}
+            image={`/api/get_paragraph_summary_image/${selectedBook}/${
+              chapterIndex + 1
+            }/${paragraphIndex}`}
           />
         {/each}
       {:else}
         {#each chapter.paragraphs as paragraph, paragraphIndex}
-          <FullLevel
-            {selectedBook}
-            {chapterIndex}
-            {paragraph}
-            {paragraphIndex}
+          <SummaryElement
+            text={paragraph}
+            image={`/api/get_paragraph_summary_image/${selectedBook}/${
+              chapterIndex + 1
+            }/${paragraphIndex}`}
           />
         {/each}
       {/if}

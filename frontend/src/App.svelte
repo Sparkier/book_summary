@@ -20,7 +20,7 @@
         {/each}
       </select>
       {#await fetchBook(selectedBook)}
-      Loading book.
+        Loading book.
       {:then book}
         <Heading heading={book["title"]} />
         <div class="py-2">
@@ -40,7 +40,6 @@
         Book could not be loaded.
       {/await}
     {/await}
-    
   </div>
 </main>
 

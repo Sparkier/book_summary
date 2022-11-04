@@ -1990,6 +1990,11 @@ micromatch@^4.0.2, micromatch@^4.0.4:
     braces "^3.0.2"
     picomatch "^2.3.1"
 
+mime@>=2.0.3:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/mime/-/mime-3.0.0.tgz#b374550dca3a0c18443b0c950a6a58f1931cf7a7"
+  integrity sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==
+
 mimic-fn@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-2.1.0.tgz#7ed2c2ccccaf84d3ffcb7a69b57711fc2083401b"
@@ -2121,6 +2126,11 @@ onetime@^5.1.0:
   integrity sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==
   dependencies:
     mimic-fn "^2.1.0"
+
+opener@1:
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
+  integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
 optionator@^0.9.1:
   version "0.9.1"
@@ -2453,6 +2463,14 @@ rollup-plugin-livereload@^2.0.0:
   integrity sha512-vqQZ/UQowTW7VoiKEM5ouNW90wE5/GZLfdWuR0ELxyKOJUIaj+uismPZZaICU4DnWPVjnpCDDxEqwU7pcKY/PA==
   dependencies:
     livereload "^0.9.1"
+
+rollup-plugin-serve-proxy@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-serve-proxy/-/rollup-plugin-serve-proxy-1.1.4.tgz#3918987305d7176c1daa5fef2cacbd78663c12c7"
+  integrity sha512-C3/1O/ZuD83/Y5pTM6lIOHCVmglbM2Ndw6E0W7u9pixKNftLN08n390rPCvrmT+oSzmvhK927/GSWJp2DclUGg==
+  dependencies:
+    mime ">=2.0.3"
+    opener "1"
 
 rollup-plugin-svelte@^7.0.0:
   version "7.1.0"
