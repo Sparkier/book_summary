@@ -40,32 +40,28 @@ def get_title(book):
     return jsonify(data)
 
 
-@app.route('/api/get_book_summary_image/<book>')
-def get_book_summary_image(book):
-    imgs_dir = Path(DATA_DIR, book, "book_summary")
-    filePaths = [file for file in imgs_dir.iterdir() if file.name.startswith('0')]
-    return send_file(filePaths[0], mimetype='image/png')
+@app.route('/api/get_book_summary_image/<book>/<int:index>')
+def get_book_summary_image(book, index: int):
+    filename = Path(DATA_DIR, book, f"book_summary-{index:04d}.png")
+    return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_chapter_summary_image/<book>/<chapter>/<index>')
-def get_chapter_summary_image(book, chapter, index):
-    imgs_dir = Path(DATA_DIR, book, "chapters", chapter, "chapter_summary")
-    filePaths = [file for file in imgs_dir.iterdir() if file.name.startswith(index)]
-    return send_file(filePaths[0], mimetype='image/png')
+@app.route('/api/get_chapter_summary_image/<book>/<int:chapter>/<int:index>')
+def get_chapter_summary_image(book, chapter: int, index: int):
+    filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_chapter_summary-{index:04d}.png")
+    return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_paragraph_summary_image/<book>/<chapter>/<index>')
-def get_paragraph_summary_image(book, chapter, index):
-    imgs_dir = Path(DATA_DIR, book, "chapters", chapter, "paragraph_summaries")
-    filePaths = [file for file in imgs_dir.iterdir() if file.name.startswith(index)]
-    return send_file(filePaths[0], mimetype='image/png')
+@app.route('/api/get_paragraph_summary_image/<book>/<int:chapter>/<int:index>')
+def get_paragraph_summary_image(book, chapter: int, index: int):
+    filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_paragraph_summary-{index:04d}.png")
+    return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_paragraph_image/<book>/<chapter>/<index>')
-def get_paragraph_image(book, chapter, index):
-    imgs_dir = Path(DATA_DIR, book, "chapters", chapter, "paragraphs")
-    filePaths = [file for file in imgs_dir.iterdir() if file.name.startswith(index)]
-    return send_file(filePaths[0], mimetype='image/png')
+@app.route('/api/get_paragraph_image/<book>/<int:chapter>/<int:index>')
+def get_paragraph_image(book, chapter: int, index: int):
+    filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{index:04d}.png")
+    return send_file(filename, mimetype='image/png')
 
 
 if __name__ == '__main__':

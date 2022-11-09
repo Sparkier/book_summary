@@ -14,7 +14,7 @@
   {#if abstractionLevel === AbstractionLevel.BOOK}
     <SummaryElement
       text={book.book_summary}
-      image={`/api/get_book_summary_image/${selectedBook}`}
+      image={`/api/get_book_summary_image/${selectedBook}/0`}
     />
   {:else}
     {#each book.chapters as chapter, chapterIndex}
@@ -39,7 +39,7 @@
         {#each chapter.paragraphs as paragraph, paragraphIndex}
           <SummaryElement
             text={paragraph}
-            image={`/api/get_paragraph_summary_image/${selectedBook}/${
+            image={`/api/get_paragraph_image/${selectedBook}/${
               chapterIndex + 1
             }/${paragraphIndex}`}
           />
