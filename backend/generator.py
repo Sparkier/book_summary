@@ -20,7 +20,8 @@ def to_safe_filename(string):
     """
     # Windows does not support too long filenames
     file_name_max_length = 250
-    return "".join([c for c in string if c.isalpha() or c.isdigit() or c == ' ']).rstrip()[:file_name_max_length]
+    valid_filename = "".join([c for c in string if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
+    return valid_filename[:file_name_max_length]
 
 
 def generate_image_from_text(model, output_dir, prepend_name, text, text_idx):

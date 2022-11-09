@@ -14,6 +14,11 @@ DATA_DIR = Path('data')
 
 @app.route('/api/get_books', methods=['GET'])
 def get_books():
+    """Get list of books.
+
+    Returns:
+        Response<string[]>: book titles.
+    """
     data = []
     for path in DATA_DIR.iterdir():
         if path.is_dir():
@@ -27,6 +32,14 @@ def get_books():
 
 @app.route('/api/get_book/<book>')
 def get_book(book):
+    """Get summarized book information.
+
+    Args:
+        book (string): name of the book
+
+    Returns:
+        Response: summaries of the book, its chapters, and paragraphs.
+    """
     path = Path(DATA_DIR, book, "summarized.json")
     if not path.exists():
         return jsonify({"book": []})
@@ -35,6 +48,14 @@ def get_book(book):
 
 @app.route('/api/get_title/<book>')
 def get_title(book):
+    """Get book title.
+
+    Args:
+        book (string): name of the book
+
+    Returns:
+        string: book title.
+    """
     with open(Path(DATA_DIR, book, 'summarized.json'), encoding='utf8') as json_file:
         data = json.load(json_file)["book"]["title"]
     return jsonify(data)
@@ -42,25 +63,64 @@ def get_title(book):
 
 @app.route('/api/get_book_summary_image/<book>/<int:index>')
 def get_book_summary_image(book, index: int):
+    """Get image representation of the summarized book.
+
+    Args:
+        book (string): name of the book
+        index (int): the index of the image representation.
+
+    Returns:
+        Response: book image representation.
+    """
     filename = Path(DATA_DIR, book, f"book_summary-{index:04d}.png")
     return send_file(filename, mimetype='image/png')
 
 
 @app.route('/api/get_chapter_summary_image/<book>/<int:chapter>/<int:index>')
 def get_chapter_summary_image(book, chapter: int, index: int):
+    """Get image representation of the summarized chapter.
+
+    Args:
+        book (string): name of the book
+        chapter (int): chapter index.
+        index (int): the index of the image representation.
+
+    Returns:
+        Response: chapter image representation.
+    """
     filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_chapter_summary-{index:04d}.png")
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_paragraph_summary_image/<book>/<int:chapter>/<int:index>')
-def get_paragraph_summary_image(book, chapter: int, index: int):
-    filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_paragraph_summary-{index:04d}.png")
+@app.route('/api/get_paragraph_summary_image/<book>/<int:chapter>/<int:paragraph>')
+def get_paragraph_summary_image(book, chapter: int, paragraph: int):
+    """Get image representation of the summarized paragraph.
+
+    Args:
+        book (string): name of the book
+        chapter (int): chapter index.
+        paragraph (int): the paragraph index within the chapter.
+
+    Returns:
+        Response: paragraph image representation.
+    """
+    filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}.png")
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_paragraph_image/<book>/<int:chapter>/<int:index>')
-def get_paragraph_image(book, chapter: int, index: int):
-    filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{index:04d}.png")
+@app.route('/api/get_paragraph_image/<book>/<int:chapter>/<int:paragraph>')
+def get_paragraph_image(book, chapter: int, paragraph: int):
+    """Get image representation of the full paragraph.
+
+    Args:
+        book (string): name of the book
+        chapter (int): chapter index.
+        paragraph (int): the paragraph index within the chapter.
+
+    Returns:
+        Response: paragraph image representation.
+    """
+    filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{paragraph:04d}.png")
     return send_file(filename, mimetype='image/png')
 
 
