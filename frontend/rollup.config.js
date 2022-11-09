@@ -7,7 +7,7 @@ import sveltePreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
 import css from "rollup-plugin-css-only";
 import json from "@rollup/plugin-json";
-import serve from "rollup-plugin-serve-proxy";
+import dev from "rollup-plugin-dev";
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -56,17 +56,12 @@ export default {
 
     // In dev mode, call `npm run start` once
     // the bundle has been generated
-    !production &&
-      serve({
-        open: true,
-        contentBase: "public",
-        host: "localhost",
-        port: 8080,
-        proxy: {
-          api: "http://127.0.0.1:5000",
-        },
-      }),
-
+    !production && dev({ 
+      host: 'localhost',
+      dirs: ['public'],
+      port: 8080,
+      proxy: [{ from: '/api', to: 'http://localhost:5000/api' }] 
+    }),
     // Watch the `public` directory and refresh the
     // browser on changes when not in production
     !production && livereload("public"),
