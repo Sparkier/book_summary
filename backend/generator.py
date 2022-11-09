@@ -18,19 +18,23 @@ def to_safe_filename(string):
     Returns:
         string: the save filename after conversion
     """
-    return "".join([c for c in string if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
+    # Windows does not support too long filenames
+    file_name_max_length = 250
+    valid_filename = "".join([c for c in string if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
+    return valid_filename[:file_name_max_length]
 
 
-def generate_image_from_text(model, output_dir, text, text_idx):
+def generate_image_from_text(model, output_dir, prepend_name, text, text_idx):
     """Generating an image from a text segment using a diffusion model.
 
     Args:
         model (Model): the ml diffusion model used to generate the image
         output_dir (Path): where to save the generated image
+        prepend_name (string): text to prepend filename with, e.g., prepend_name-X.png
         text (string): the prompt for which an image is to be generated
         text_idx (string): the index of the prompt within the level
     """
-    print(output_dir, text_idx)
+    print(output_dir, prepend_name, text_idx)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print("Generating image for text:", text)
@@ -38,25 +42,24 @@ def generate_image_from_text(model, output_dir, text, text_idx):
     max_length = 77
     generated_images = model.text_to_image(text[:max_length], batch_size=1)
     diffusion_image = Image.fromarray(generated_images[0])
-    # Windows does not support too long filenames
-    file_name_max_length = 250
     file_name = output_dir / \
-        f"{text_idx}-{to_safe_filename(text[:file_name_max_length])}.png"
+        f"{prepend_name}-{text_idx:04d}.png"
     diffusion_image.save(file_name)
 
 
-def iterate_level(model, output_dir, content_in_level):
+def iterate_level(model, output_dir, prepend_name, content_in_level):
     """Iterate all the content of a level to create images for the texts.
 
     Args:
         model (Model): the diffusion model to create images with
         output_dir (string): where to write the resulting images
+        prepend_name (string): text to prepend filename with, e.g., prepend_name-X.png
         content_in_level (List[string]): the content of the current level
     """
     for idx, text in enumerate(content_in_level):
         if not to_safe_filename(text):
             continue
-        generate_image_from_text(model, output_dir, text, idx)
+        generate_image_from_text(model, output_dir, prepend_name, text, idx)
 
 
 if __name__ == '__main__':
@@ -73,18 +76,19 @@ if __name__ == '__main__':
         book_content = util.parse_json(input_file)
     book = book_content["book"]
 
-    diffusion_model = keras_cv.models.StableDiffusion(img_width=512, img_height=512)
+    diffusion_model = keras_cv.models.StableDiffusion(
+        img_width=512, img_height=512)
 
     book_dir = Path(target_dir / to_safe_filename(book["title"]))
     for chapter in book["chapters"]:
-        ch_num = chapter['num']
+        ch_num = int(chapter['num'])
 
-        iterate_level(diffusion_model, Path(book_dir, "chapters", str(ch_num),
-                      "paragraphs"), chapter["paragraphs"])
-        iterate_level(diffusion_model, Path(book_dir, "chapters", str(ch_num),
-                      "paragraph_summaries"), chapter["paragraph_summaries"])
-        iterate_level(diffusion_model, Path(book_dir, "chapters", str(ch_num),
-                      "chapter_summary"), [chapter["chapter_summary"]])
+        iterate_level(diffusion_model, book_dir,
+                      f"chapter-{ch_num:03d}_paragraph", chapter["paragraphs"])
+        iterate_level(diffusion_model, book_dir, f"chapter-{ch_num:03d}_paragraph_summary",
+                      chapter["paragraph_summaries"])
+        iterate_level(diffusion_model, book_dir, f"chapter-{ch_num:03d}_chapter_summary",
+                      [chapter["chapter_summary"]])
 
-    iterate_level(diffusion_model, Path(book_dir, "book_summary"),
-                  [book["book_summary"]])
+    iterate_level(diffusion_model, book_dir,
+                  "book_summary", [book["book_summary"]])
