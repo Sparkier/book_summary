@@ -1,16 +1,17 @@
-const colors = require("tailwindcss/colors");
+/** @type {import('tailwindcss').Config} */
+const colors = require('tailwindcss/colors');
 
-module.exports = {
-  content: ["./src/**/*.{html,js,svelte,ts}"],
-  theme: {
-    extend: {
-      colors: {
-        transparent: "transparent",
-      },
-    },
-  },
-  fontFamily: {
-    sans: ["-apple-system", "BlinkMacSystemFont", "Helvetica", "sans-serif"],
-  },
-  plugins: [],
+export default {
+	content: ['./src/**/*.{html,js,svelte,ts}'],
+	theme: {
+		extend: {
+			colors: {
+				transparent: 'transparent'
+			}
+		}
+	},
+	fontFamily: {
+		sans: ['-apple-system', 'BlinkMacSystemFont', 'Helvetica', 'sans-serif']
+	},
+	plugins: []
 };
