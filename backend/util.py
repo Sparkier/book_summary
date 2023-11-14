@@ -45,6 +45,7 @@ def parse_chapter(ch_num, chapter):
     # Some will start/end with newlines (strip fixes this)
     # Some contain '\n     ' (for formating purposes?). Replace those.
     paragraphs = [para.get_text().replace('\n     ', '').strip() for para in soup.find_all('p')]
+    paragraphs = list(filter(len, paragraphs))
     return {"num": ch_num, "title": chapter.title, "paragraphs": paragraphs}
 
 
