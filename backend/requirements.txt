@@ -3,3 +3,4 @@ torch
 transformers
 ebooklib
 bs4
+pylint
