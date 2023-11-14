@@ -1,8 +1,10 @@
 # Book Summary
 
+In this repository, we generate both textual summaries and image descriptions for written texts.
+
 ## Intro
 
-In this repository, we generate both textual summaries and image descriptions for written texts.
+The application is divided into Frontend and Backend. The backend is a locally running python server which is communicating with the frontend svelte based web application.
 
 ### Backend
 
@@ -33,10 +35,11 @@ As an example Visual Studio Code is used here. Check that you have the Python ex
 The general setup is only necessary the first time. 
 
 #### Environment (Recommended, but optional)
- 1. Install conda as Python environment (e.g. miniconda). 
+
+ 1. Install [miniconda](https://docs.conda.io/projects/miniconda/en/latest/index.html) as Python environment. 
  2. Press STRG + SHIFT + P and search for Python: Create Environment > Conda.
 
-(Here you can find more information regarding environments `https://code.visualstudio.com/docs/python/environments`)
+[Here](https://code.visualstudio.com/docs/python/environments) you can find more information regarding environments.
 
 #### Interpreter
 To select an interpreter, press STRG + SHIFT + P and search for Python: Select Interpreter. 
