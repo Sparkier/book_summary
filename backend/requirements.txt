@@ -6,4 +6,4 @@ bs4
 pylint
 keras-cv
 matplotlib
-PIL
+Pillow
