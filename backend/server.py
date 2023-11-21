@@ -2,15 +2,48 @@
 import json
 from pathlib import Path
 
-from flask import Flask, jsonify, send_file
+from flask import Flask, jsonify, send_file, request
+import os
+from werkzeug.utils import secure_filename
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
+
 OK_STATUS = 200
 ERROR_STATUS = 400
 TEXT_TYPE = {'ContentType': 'text/plain'}
 JSON_TYPE = {'ContentType': 'application/json'}
 DATA_DIR = Path('data')
+UPLOAD_FOLDER = Path('data') 
+ALLOWED_EXTENSIONS = {'epub'}
 
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/api/upload_book', methods=['POST'])
+def upload_book():
+    """Upload a book in EPUB format.
+
+    Returns:
+        Response: Status der Upload-Anfrage.
+    """
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), ERROR_STATUS
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), ERROR_STATUS
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return jsonify({'message': 'File successfully uploaded'}), OK_STATUS
+
+    return jsonify({'error': 'Invalid file type'}), ERROR_STATUS
 
 @app.route('/api/get_books', methods=['GET'])
 def get_books():
