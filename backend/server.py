@@ -1,13 +1,13 @@
 """Server interface for the latent retrieval demo."""
 import json
-from pathlib import Path
-
-from flask import Flask, jsonify, send_file, request
 import os
+import subprocess
+from pathlib import Path
+from flask import Flask, jsonify, send_file, request
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from ebooklib import epub
-import subprocess
+
 
 app = Flask(__name__)
 CORS(app)
@@ -17,13 +17,23 @@ ERROR_STATUS = 400
 TEXT_TYPE = {'ContentType': 'text/plain'}
 JSON_TYPE = {'ContentType': 'application/json'}
 DATA_DIR = Path('data')
-UPLOAD_FOLDER = Path('data') 
+UPLOAD_FOLDER = Path('data')
 ALLOWED_EXTENSIONS = {'epub'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def allowed_file(filename):
+
+def allowed_file(filename: str):
+    """_summary_
+
+    Args:
+        filename (str): _description_
+
+    Returns:
+        _type_: _description_
+    """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route('/api/upload_book', methods=['POST'])
 def upload_book():
@@ -51,22 +61,19 @@ def upload_book():
         title = title[0][0] if title else None
 
         if title:
-            valid_title = ''.join(c if c.isalnum() or c in {' ', '-', '_'} else '' for c in title)
-            # Create a folder with the book title
-            folder_path = os.path.join(app.config['UPLOAD_FOLDER'], valid_title)
+            valid_title = ''.join(c if c.isalnum() or c in {
+                                  ' ', '-', '_'} else '' for c in title)
+            folder_path = os.path.join(
+                app.config['UPLOAD_FOLDER'], valid_title)
             os.makedirs(folder_path, exist_ok=True)
-
-            # Move the EPUB file into the created folder
             new_file_path = os.path.join(folder_path, filename)
             os.rename(file_path, new_file_path)
-
-            # Call the Book Summarizer script with the input and output directories
             summarizer_command = [
                 "python", "book_summarizer.py",
                 "--input_file", os.path.join(folder_path, filename),
                 "--output_dir", folder_path
             ]
-            subprocess.run(summarizer_command)
+            subprocess.run(summarizer_command, check=False)
 
             return jsonify({'message': 'File successfully uploaded', 'title': title}), OK_STATUS
         else:
@@ -74,6 +81,7 @@ def upload_book():
             return jsonify({'error': 'Failed to extract book title'}), ERROR_STATUS
 
     return jsonify({'error': 'Invalid file type'}), ERROR_STATUS
+
 
 @app.route('/api/get_books', methods=['GET'])
 def get_books():
@@ -151,7 +159,8 @@ def get_chapter_summary_image(book, chapter: int, index: int):
     Returns:
         Response: chapter image representation.
     """
-    filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_chapter_summary-{index:04d}.png")
+    filename = Path(
+        DATA_DIR, book, f"chapter-{chapter:03d}_chapter_summary-{index:04d}.png")
     return send_file(filename, mimetype='image/png')
 
 
@@ -167,7 +176,8 @@ def get_paragraph_summary_image(book, chapter: int, paragraph: int):
     Returns:
         Response: paragraph image representation.
     """
-    filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}.png")
+    filename = Path(
+        DATA_DIR, book, f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}.png")
     return send_file(filename, mimetype='image/png')
 
 
@@ -183,7 +193,8 @@ def get_paragraph_image(book, chapter: int, paragraph: int):
     Returns:
         Response: paragraph image representation.
     """
-    filename = Path(DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{paragraph:04d}.png")
+    filename = Path(
+        DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{paragraph:04d}.png")
     return send_file(filename, mimetype='image/png')
 
 
