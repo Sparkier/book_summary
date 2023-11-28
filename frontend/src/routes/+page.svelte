@@ -11,55 +11,51 @@
 	let fileInput: any;
 	let isGenerating = false;
 
-  	
 	async function handleFileUpload(event: any) {
-    const file = event.target.files[0];
-    console.log("Hochgeladene .epub-Datei:", file);
+		const file = event.target.files[0];
+		console.log('Hochgeladene .epub-Datei:', file);
 
-    // Set isGenerating to true before uploading the book
-    isGenerating = true;
+		// Set isGenerating to true before uploading the book
+		isGenerating = true;
 
-    const formData = new FormData();
-    formData.append('file', file);
+		const formData = new FormData();
+		formData.append('file', file);
 
-    try {
-      const response = await fetch('http://127.0.0.1:5000/api/upload_book', {
-        method: 'POST',
-        body: formData,
-      });
+		try {
+			const response = await fetch('http://127.0.0.1:5000/api/upload_book', {
+				method: 'POST',
+				body: formData
+			});
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Erfolgreich hochgeladen:', data);
-		// Reload the page after successful generation
-		location.reload();
-      } else {
-        console.error('Fehler beim Hochladen:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Fehler beim Hochladen:', error);
-    } finally {
-      // Set isGenerating back to false after the upload is complete
-      isGenerating = false;
-	  
-    }
-  }
-
-
+			if (response.ok) {
+				const data = await response.json();
+				console.log('Erfolgreich hochgeladen:', data);
+				// Reload the page after successful generation
+				location.reload();
+			} else {
+				console.error('Fehler beim Hochladen:', response.statusText);
+			}
+		} catch (error) {
+			console.error('Fehler beim Hochladen:', error);
+		} finally {
+			// Set isGenerating back to false after the upload is complete
+			isGenerating = false;
+		}
+	}
 </script>
 
 <main class="overflow-hidden h-full">
 	<div class="flex flex-col h-full">
-	  <button on:click={() => fileInput.click()} disabled={isGenerating}>
-		{isGenerating ? 'Generating...' : 'Upload file'}
-	  </button>
-	  <input
-		type="file"
-		accept=".epub"
-		style="display: none"
-		bind:this={fileInput}
-		on:change={handleFileUpload}
-	  	/>
+		<button on:click={() => fileInput.click()} disabled={isGenerating}>
+			{isGenerating ? 'Generating...' : 'Upload file'}
+		</button>
+		<input
+			type="file"
+			accept=".epub"
+			style="display: none"
+			bind:this={fileInput}
+			on:change={handleFileUpload}
+		/>
 		{#await fetchBooks() then books}
 			<select bind:value={selectedBook}>
 				{#each books as book}
