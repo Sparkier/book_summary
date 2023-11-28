@@ -24,13 +24,13 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 def allowed_file(filename: str):
-    """_summary_
+    """Check if the file is a epub file
 
     Args:
-        filename (str): _description_
+        filename (str): Name of the file
 
     Returns:
-        _type_: _description_
+        (Boolean): True or False
     """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -76,9 +76,7 @@ def upload_book():
             subprocess.run(summarizer_command, check=False)
 
             return jsonify({'message': 'File successfully uploaded', 'title': title}), OK_STATUS
-        else:
-            # If title extraction fails, keep the file in the main upload folder
-            return jsonify({'error': 'Failed to extract book title'}), ERROR_STATUS
+        return jsonify({'error': 'Failed to extract book title'}), ERROR_STATUS
 
     return jsonify({'error': 'Invalid file type'}), ERROR_STATUS
 
