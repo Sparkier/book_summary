@@ -6,6 +6,8 @@ from flask import Flask, jsonify, send_file, request
 import os
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
+from ebooklib import epub
+import subprocess
 
 app = Flask(__name__)
 CORS(app)
@@ -25,7 +27,7 @@ def allowed_file(filename):
 
 @app.route('/api/upload_book', methods=['POST'])
 def upload_book():
-    """Upload a book in EPUB format.
+    """Upload a book in EPUB format and create a folder with the book title.
 
     Returns:
         Response: Status der Upload-Anfrage.
@@ -40,8 +42,36 @@ def upload_book():
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return jsonify({'message': 'File successfully uploaded'}), OK_STATUS
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        # Extract the title from the EPUB metadata
+        book = epub.read_epub(file_path)
+        title = book.get_metadata('DC', 'title')
+        title = title[0][0] if title else None
+
+        if title:
+            valid_title = ''.join(c if c.isalnum() or c in {' ', '-', '_'} else '' for c in title)
+            # Create a folder with the book title
+            folder_path = os.path.join(app.config['UPLOAD_FOLDER'], valid_title)
+            os.makedirs(folder_path, exist_ok=True)
+
+            # Move the EPUB file into the created folder
+            new_file_path = os.path.join(folder_path, filename)
+            os.rename(file_path, new_file_path)
+
+            # Call the Book Summarizer script with the input and output directories
+            summarizer_command = [
+                "python", "book_summarizer.py",
+                "--input_file", os.path.join(folder_path, filename),
+                "--output_dir", folder_path
+            ]
+            subprocess.run(summarizer_command)
+
+            return jsonify({'message': 'File successfully uploaded', 'title': title}), OK_STATUS
+        else:
+            # If title extraction fails, keep the file in the main upload folder
+            return jsonify({'error': 'Failed to extract book title'}), ERROR_STATUS
 
     return jsonify({'error': 'Invalid file type'}), ERROR_STATUS
 
