@@ -3,7 +3,7 @@
 import argparse
 import json
 from pathlib import Path
-
+from transformers import AutoTokenizer
 from transformers import pipeline
 
 import util
@@ -22,7 +22,9 @@ def text_summarization(summarizer, text, min_length=5, max_length=77):
     Returns:
         string: the summarized version of the text
     """
-    text_len = len(text)
+    tokenizer = AutoTokenizer.from_pretrained("sshleifer/distilbart-cnn-12-6")
+    tokens = tokenizer.tokenize(tokenizer.decode(tokenizer.encode(text)))
+    text_len = len(tokens)
     summary = summarizer(text, min_length=min(min_length, text_len),
                          max_length=min(text_len, max_length), truncation=True)
     return summary[0]['summary_text']
@@ -61,7 +63,8 @@ if __name__ == '__main__':
         summarized_book["chapters"][ch_num]["chapter_summary"] = chapter_summary
         chapter_summaries.append(chapter_summary)
 
-    book_summary = text_summarization(summarization_model, ''.join(chapter_summaries))
+    book_summary = text_summarization(
+        summarization_model, ''.join(chapter_summaries))
     book["book_summary"] = book_summary
-    with open(Path(output_dir, input_file.stem + '_summarized.json'), 'w', encoding='utf-8') as f:
+    with open(Path(output_dir, 'summarized.json'), 'w', encoding='utf-8') as f:
         json.dump({"book": book}, f)
