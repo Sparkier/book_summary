@@ -25,7 +25,6 @@ def text_summarization(summarizer, text, min_length=5, max_length=77):
     tokenizer = AutoTokenizer.from_pretrained("sshleifer/distilbart-cnn-12-6")
     tokens = tokenizer.tokenize(tokenizer.decode(tokenizer.encode(text)))
     text_len = len(tokens)
-    # text_len = len(text)
     summary = summarizer(text, min_length=min(min_length, text_len),
                          max_length=min(text_len, max_length), truncation=True)
     return summary[0]['summary_text']
