@@ -8,15 +8,24 @@
 	let selectedBook = 'Alices Adventures in Wonderland';
 
 	let abstractionLevel = AbstractionLevel.BOOK;
-	let fileInput: any;
-	let isGenerating = false;
+	let fileInput: HTMLInputElement;
+	let isGenerating: boolean = false;
+	let uploadError: string = '';
 
-	async function handleFileUpload(event: any) {
-		const file = event.target.files[0];
-		console.log('Hochgeladene .epub-Datei:', file);
+	async function handleFileUpload(event: Event) {
+		const target = event.target as HTMLInputElement;
+
+		if (!target?.files || target.files.length === 0) {
+			// Handle the case where files are null or empty
+			uploadError = 'Wrong file selected.';
+			return;
+		}
+
+		const file = target.files[0];
 
 		// Set isGenerating to true before uploading the book
 		isGenerating = true;
+		uploadError = ''; // Clear any previous errors
 
 		const formData = new FormData();
 		formData.append('file', file);
@@ -27,16 +36,18 @@
 				body: formData
 			});
 
-			if (response.ok) {
+			if (!response.ok) {
 				const data = await response.json();
-				console.log('Erfolgreich hochgeladen:', data);
+				// Set the error message
+				uploadError = data.error || 'Upload failed';
+			} else {
+				const data = await response.json();
 				// Reload the page after successful generation
 				location.reload();
-			} else {
-				console.error('Fehler beim Hochladen:', response.statusText);
 			}
 		} catch (error) {
-			console.error('Fehler beim Hochladen:', error);
+			// Set the error message
+			uploadError = 'An error occurred during upload';
 		} finally {
 			// Set isGenerating back to false after the upload is complete
 			isGenerating = false;
@@ -82,7 +93,7 @@
 				</div>
 				<SummaryContainer {book} {selectedBook} {abstractionLevel} />
 			{:catch}
-				Book could not be loaded.
+				<p style="color: red;">{uploadError || 'Book could not be loaded.'}</p>
 			{/await}
 		{/await}
 	</div>
