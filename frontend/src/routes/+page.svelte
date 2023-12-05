@@ -9,8 +9,8 @@
 
 	let abstractionLevel = AbstractionLevel.BOOK;
 	let fileInput: HTMLInputElement;
-	let isGenerating: boolean = false;
-	let uploadError: string = '';
+	let isGenerating = false;
+	let uploadError = '';
 
 	async function handleFileUpload(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -41,7 +41,6 @@
 				// Set the error message
 				uploadError = data.error || 'Upload failed';
 			} else {
-				const data = await response.json();
 				// Reload the page after successful generation
 				location.reload();
 			}
