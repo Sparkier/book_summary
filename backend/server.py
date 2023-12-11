@@ -7,7 +7,7 @@ from flask import Flask, jsonify, send_file, request
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from ebooklib import epub
-
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -33,6 +33,50 @@ def allowed_file(filename: str):
         (Boolean): True or False
     """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/api/generate_image', methods=['POST'])
+def generate_image():
+    """Generate an image on the server based on client input.
+
+    Returns:
+        Response: Status of the image generation.
+    """
+    data = request.get_json()
+    src = data.get('src')
+
+    try:
+        # Extract book, chapter, paragraph, index from the src path
+        _, _, route_type, book, *rest = src.split('/')
+
+        if route_type == 'get_book_summary_image':
+            index = int(rest[0])
+            filename = Path(DATA_DIR, book, f"book_summary-{index:04d}.png")
+        elif route_type == 'get_chapter_summary_image':
+            chapter, index = map(int, rest)
+            filename = Path(
+                DATA_DIR, book, f"chapter-{chapter:03d}_chapter_summary-{index:04d}.png")
+        elif route_type == 'get_paragraph_summary_image':
+            chapter, paragraph = map(int, rest)
+            filename = Path(
+                DATA_DIR, book, f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}.png")
+        elif route_type == 'get_paragraph_image':
+            chapter, paragraph = map(int, rest)
+            filename = Path(
+                DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{paragraph:04d}.png")
+        else:
+            return jsonify({'error': 'Unknown route type'}), ERROR_STATUS
+
+        # Adjust the command based on your actual image generation script
+        image_generator_command = [
+            "python", "image_generator.py",
+            "--text", data.get('text'),
+            "--output_path", str(filename)
+        ]
+        subprocess.run(image_generator_command, check=True)
+        return jsonify({'message': 'Image successfully generated'}), OK_STATUS
+    except subprocess.CalledProcessError as e:
+        return jsonify({'error': f'Error generating image: {e.stderr.decode()}'}), ERROR_STATUS
 
 
 @app.route('/api/upload_book', methods=['POST'])

@@ -12,7 +12,7 @@
 	<div class="flex-item">
 		<div class="flex flex-row border-t-4">
 			<TextComponent {text} />
-			<ImageComponent src={image} />
+			<ImageComponent src={image} {text} />
 		</div>
 	</div>
 </div>
