@@ -5,13 +5,11 @@ import subprocess
 from pathlib import Path
 from flask import Flask, jsonify, send_file, request
 from werkzeug.utils import secure_filename
-from flask_cors import CORS
 from ebooklib import epub
-import time
+from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-
 OK_STATUS = 200
 ERROR_STATUS = 400
 TEXT_TYPE = {'ContentType': 'text/plain'}
@@ -66,11 +64,18 @@ def generate_image():
                 DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{paragraph:04d}.png")
         else:
             return jsonify({'error': 'Unknown route type'}), ERROR_STATUS
+        counter = 1
+        text = data.get('prompt')
+        basefilename = filename
+        while os.path.exists(filename):
+            # If the file exists, generate a new filename with an incrementing counter
+            filename = basefilename.with_stem(
+                f"{filename.stem}-version-{counter}")
+            counter += 1
 
-        # Adjust the command based on your actual image generation script
         image_generator_command = [
             "python", "image_generator.py",
-            "--text", data.get('text'),
+            "--text", text,
             "--output_path", str(filename)
         ]
         subprocess.run(image_generator_command, check=True)
@@ -174,70 +179,191 @@ def get_title(book):
     return jsonify(data)
 
 
-@app.route('/api/get_book_summary_image/<book>/<int:index>')
-def get_book_summary_image(book, index: int):
+@app.route('/api/get_book_summary_image/<book>/<int:index>', defaults={'version': None})
+@app.route('/api/get_book_summary_image/<book>/<int:index>/<version>')
+def get_book_summary_image(book, index: int, version):
     """Get image representation of the summarized book.
 
     Args:
         book (string): name of the book
         index (int): the index of the image representation.
+        version (string): version number (default: None).
 
     Returns:
         Response: book image representation.
     """
-    filename = Path(DATA_DIR, book, f"book_summary-{index:04d}.png")
+    if version is not None:
+        filename = Path(
+            DATA_DIR, book, f"book_summary-{index:04d}-version-{version}.png")
+    else:
+        filename = Path(DATA_DIR, book, f"book_summary-{index:04d}.png")
+
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_chapter_summary_image/<book>/<int:chapter>/<int:index>')
-def get_chapter_summary_image(book, chapter: int, index: int):
+@app.route('/api/get_chapter_summary_image/<book>/<int:chapter>/<int:index>', defaults={'version': None})
+@app.route('/api/get_chapter_summary_image/<book>/<int:chapter>/<int:index>/<version>')
+def get_chapter_summary_image(book, chapter: int, index: int, version):
     """Get image representation of the summarized chapter.
 
     Args:
         book (string): name of the book
         chapter (int): chapter index.
         index (int): the index of the image representation.
+        version (string): version number (default: None).
 
     Returns:
         Response: chapter image representation.
     """
-    filename = Path(
-        DATA_DIR, book, f"chapter-{chapter:03d}_chapter_summary-{index:04d}.png")
+    if version is not None:
+        filename = Path(
+            DATA_DIR, book, f"chapter-{chapter:03d}_chapter_summary-{index:04d}-version-{version}.png")
+    else:
+        filename = Path(
+            DATA_DIR, book, f"chapter-{chapter:03d}_chapter_summary-{index:04d}.png")
+
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_paragraph_summary_image/<book>/<int:chapter>/<int:paragraph>')
-def get_paragraph_summary_image(book, chapter: int, paragraph: int):
+@app.route('/api/get_paragraph_summary_image/<book>/<int:chapter>/<int:paragraph>', defaults={'version': None})
+@app.route('/api/get_paragraph_summary_image/<book>/<int:chapter>/<int:paragraph>/<version>')
+def get_paragraph_summary_image(book, chapter: int, paragraph: int, version):
     """Get image representation of the summarized paragraph.
 
     Args:
         book (string): name of the book
         chapter (int): chapter index.
         paragraph (int): the paragraph index within the chapter.
+        version (string): version number (default: None).
 
     Returns:
         Response: paragraph image representation.
     """
-    filename = Path(
-        DATA_DIR, book, f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}.png")
+    if version is not None:
+        filename = Path(
+            DATA_DIR, book, f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}-version-{version}.png")
+    else:
+        filename = Path(
+            DATA_DIR, book, f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}.png")
+
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_paragraph_image/<book>/<int:chapter>/<int:paragraph>')
-def get_paragraph_image(book, chapter: int, paragraph: int):
+@app.route('/api/get_paragraph_image/<book>/<int:chapter>/<int:paragraph>', defaults={'version': None})
+@app.route('/api/get_paragraph_image/<book>/<int:chapter>/<int:paragraph>/<version>')
+def get_paragraph_image(book, chapter: int, paragraph: int, version):
     """Get image representation of the full paragraph.
 
     Args:
         book (string): name of the book
         chapter (int): chapter index.
         paragraph (int): the paragraph index within the chapter.
+        version (string): version number (default: None).
 
     Returns:
         Response: paragraph image representation.
     """
-    filename = Path(
-        DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{paragraph:04d}.png")
+    if version is not None:
+        filename = Path(
+            DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{paragraph:04d}-version-{version}.png")
+    else:
+        filename = Path(
+            DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{paragraph:04d}.png")
+
     return send_file(filename, mimetype='image/png')
+
+
+@app.route('/api/get_book_summary_image_versions/<book>/<int:index>')
+def get_book_summary_image_versions(book, index):
+    """Get the number of versions for a book summary image.
+
+    Args:
+        book (string): name of the book
+        index (int): index of the book summary.
+
+    Returns:
+        Response: JSON with the number of versions.
+    """
+    counter = 0
+    base_filename = Path(DATA_DIR, book, f"book_summary-{index:04d}.png")
+    # Überprüfen, ob die Basisdatei existiert
+    if base_filename.exists():
+        counter = 1
+    while (base_filename.with_name(f"{base_filename.stem}-version-{counter}.png")).exists():
+        counter += 1
+    return jsonify({'versions': counter})
+
+
+@app.route('/api/get_chapter_summary_image_versions/<book>/<int:chapter>/<int:index>')
+def get_chapter_summary_image_versions(book, chapter, index):
+    """Get the number of versions for a chapter summary image.
+
+    Args:
+        book (string): name of the book
+        chapter (int): chapter index.
+        index (int): index of the chapter summary.
+
+    Returns:
+        Response: JSON with the number of versions.
+    """
+    counter = 0
+    base_filename = Path(
+        DATA_DIR, book, f"chapter-{chapter:03d}_chapter_summary-{index:04d}.png")
+
+    # Überprüfen, ob die Basisdatei existiert
+    if base_filename.exists():
+        counter = 1
+    while (base_filename.with_name(f"{base_filename.stem}-version-{counter}.png")).exists():
+        counter += 1
+    return jsonify({'versions': counter})
+
+
+@app.route('/api/get_paragraph_summary_image_versions/<book>/<int:chapter>/<int:paragraph>')
+def get_paragraph_summary_image_versions(book, chapter, paragraph):
+    """Get the number of versions for a paragraph summary image.
+
+    Args:
+        book (string): name of the book
+        chapter (int): chapter index.
+        paragraph (int): paragraph index within the chapter.
+
+    Returns:
+        Response: JSON with the number of versions.
+    """
+    counter = 0
+    base_filename = Path(
+        DATA_DIR, book, f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}.png")
+
+    # Überprüfen, ob die Basisdatei existiert
+    if base_filename.exists():
+        counter = 1
+    while (base_filename.with_name(f"{base_filename.stem}-version-{counter}.png")).exists():
+        counter += 1
+    return jsonify({'versions': counter})
+
+
+@app.route('/api/get_paragraph_image_versions/<book>/<int:chapter>/<int:paragraph>')
+def get_paragraph_image_versions(book, chapter, paragraph):
+    """Get the number of versions for a paragraph image.
+
+    Args:
+        book (string): name of the book
+        chapter (int): chapter index.
+        paragraph (int): paragraph index within the chapter.
+
+    Returns:
+        Response: JSON with the number of versions.
+    """
+    counter = 0
+    base_filename = Path(
+        DATA_DIR, book, f"chapter-{chapter:03d}_paragraph-{paragraph:04d}.png")
+
+    # Überprüfen, ob die Basisdatei existiert
+    if base_filename.exists():
+        counter = 1
+    while (base_filename.with_name(f"{base_filename.stem}-version-{counter}.png")).exists():
+        counter += 1
+    return jsonify({'versions': counter})
 
 
 if __name__ == '__main__':
