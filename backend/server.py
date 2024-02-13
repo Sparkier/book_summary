@@ -196,7 +196,8 @@ def get_book_summary_image(book, index: int, version):
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_chapter_summary_image/<book>/<int:chapter>/<int:index>', defaults={'version': None})
+@app.route('/api/get_chapter_summary_image/<book>/<int:chapter>/<int:index>',
+           defaults={'version': None})
 @app.route('/api/get_chapter_summary_image/<book>/<int:chapter>/<int:index>/<int:version>')
 def get_chapter_summary_image(book, chapter: int, index: int, version):
     """Get image representation of the summarized chapter.
@@ -220,7 +221,8 @@ def get_chapter_summary_image(book, chapter: int, index: int, version):
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_paragraph_summary_image/<book>/<int:chapter>/<int:paragraph>', defaults={'version': None})
+@app.route('/api/get_paragraph_summary_image/<book>/<int:chapter>/<int:paragraph>',
+           defaults={'version': None})
 @app.route('/api/get_paragraph_summary_image/<book>/<int:chapter>/<int:paragraph>/<int:version>')
 def get_paragraph_summary_image(book, chapter: int, paragraph: int, version):
     """Get image representation of the summarized paragraph.
@@ -244,7 +246,8 @@ def get_paragraph_summary_image(book, chapter: int, paragraph: int, version):
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/get_paragraph_image/<book>/<int:chapter>/<int:paragraph>', defaults={'version': None})
+@app.route('/api/get_paragraph_image/<book>/<int:chapter>/<int:paragraph>',
+           defaults={'version': None})
 @app.route('/api/get_paragraph_image/<book>/<int:chapter>/<int:paragraph>/<int:version>')
 def get_paragraph_image(book, chapter: int, paragraph: int, version):
     """Get image representation of the full paragraph.
