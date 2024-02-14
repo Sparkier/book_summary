@@ -5,23 +5,30 @@ import torch
 from diffusers import StableDiffusionPipeline
 
 
-def generate_image_from_text_and_save(text, output_path):
-    """Generate an image with the Stable Diffusion model and save it.
+def generate_image_from_text(text):
+    """Generate an image with the Stable Diffusion model.
 
     Args:
         text (str): The text used for image generation.
-        output_path (str): The file path where the image should be saved.
+
+    Returns:
+        PIL.Image: The generated image.
     """
     pipeline = StableDiffusionPipeline.from_pretrained(
         "CompVis/stable-diffusion-v1-4", torch_dtype=torch.float32)
     prompt = [text]
     images = pipeline(prompt).images
+    return images[0]
 
-    # Save the generated image
-    image_path = f"{output_path}"
-    images[0].save(image_path)
 
-    return image_path
+def save_image(image, output_path):
+    """Save the generated image.
+
+    Args:
+        image (PIL.Image): The image to be saved.
+        output_path (str): The file path where the image should be saved.
+    """
+    image.save(output_path)
 
 
 if __name__ == '__main__':
@@ -36,6 +43,7 @@ if __name__ == '__main__':
 
     if not args.text or not args.output_path:
         print("Please provide both --text and --output_path arguments.")
-
-    generate_image_from_text_and_save(args.text, args.output_path)
-    print(f"Image generated and saved at: {args.output_path}.png")
+    else:
+        generated_image = generate_image_from_text(args.text)
+        save_image(generated_image, args.output_path)
+        print(f"Image generated and saved at: {args.output_path}")
