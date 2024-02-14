@@ -4,6 +4,7 @@
 	import Heading from '../elements/Heading.svelte';
 	import { AbstractionLevel } from '../types';
 	import { fetchBooks, fetchBook } from '../api';
+	import Dropdown from '../elements/Dropdown.svelte';
 
 	let selectedBook = 'Alices Adventures in Wonderland';
 
@@ -11,50 +12,63 @@
 	let fileInput: HTMLInputElement;
 	let isGenerating = false;
 	let uploadError = '';
+	let style: string;
+	let characterName = '';
+	let characterDescription = '';
+	let characters: { name: string; description: string }[] = [];
+	let readingMode = false;
+
+	const SERVER_IP = '127.0.0.1';
+	const SERVER_PORT = '5000';
+
+	function saveCharactersToStorage() {
+		localStorage.setItem('characters', JSON.stringify(characters));
+	}
+	function addCharacter() {
+		characters = [...characters, { name: characterName, description: characterDescription }];
+		saveCharactersToStorage();
+		// Clear input fields after adding the character
+		characterName = '';
+		characterDescription = '';
+	}
 
 	async function handleFileUpload(event: Event) {
 		const target = event.target as HTMLInputElement;
 
 		if (!target?.files || target.files.length === 0) {
-			// Handle the case where files are null or empty
 			uploadError = 'Wrong file selected.';
 			return;
 		}
 
 		const file = target.files[0];
-
-		// Set isGenerating to true before uploading the book
 		isGenerating = true;
-		uploadError = ''; // Clear any previous errors
+		uploadError = '';
 
 		const formData = new FormData();
 		formData.append('file', file);
 
 		try {
-			const response = await fetch('http://127.0.0.1:5000/api/upload_book', {
+			const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/api/upload_book`, {
 				method: 'POST',
 				body: formData
 			});
 
 			if (!response.ok) {
 				const data = await response.json();
-				// Set the error message
 				uploadError = data.error || 'Upload failed';
 			} else {
-				// Reload the page after successful generation
+				// Reload after new book is uploaded
 				location.reload();
 			}
 		} catch (error) {
-			// Set the error message
 			uploadError = 'An error occurred during upload';
 		} finally {
-			// Set isGenerating back to false after the upload is complete
 			isGenerating = false;
 		}
 	}
 </script>
 
-<main class="overflow-hidden h-full">
+<main class="overflow-hidden h-full m-4">
 	<div class="flex flex-col h-full">
 		<button on:click={() => fileInput.click()} disabled={isGenerating}>
 			{isGenerating ? 'Generating...' : 'Upload file'}
@@ -66,6 +80,7 @@
 			bind:this={fileInput}
 			on:change={handleFileUpload}
 		/>
+
 		{#await fetchBooks() then books}
 			<select bind:value={selectedBook}>
 				{#each books as book}
@@ -74,25 +89,95 @@
 					</option>
 				{/each}
 			</select>
+
 			{#await fetchBook(selectedBook)}
 				Loading book.
 			{:then book}
 				<Heading heading={book['title']} />
-				<div class="py-2">
-					<div class="flex">
-						<p class="pr-2">Abstraction Level:</p>
-						<select bind:value={abstractionLevel}>
-							{#each Object.values(AbstractionLevel) as abstractionLevel}
-								<option value={abstractionLevel}>
-									{abstractionLevel}
-								</option>
-							{/each}
-						</select>
+
+				{#if readingMode}
+					<div class="py-2 flex items-start">
+						<div class="ml-4 flex flex-col">
+							<div class="flex items-center">
+								<p class="pr-2">Abstraction Level:</p>
+								<Dropdown items={Object.values(AbstractionLevel)} bind:value={abstractionLevel} />
+
+								<h3 class="ml-2 mr-2">Style:</h3>
+								<select bind:value={style}>
+									<option value="anime">Anime</option>
+									<option value="realistic">Realistic</option>
+									<option value="cartoon">Cartoon</option>
+									<option value="No style">No style</option>
+								</select>
+								<label for="readingMode" class="ml-2 mr-2">Reading Mode</label>
+								<input type="checkbox" bind:checked={readingMode} id="readingMode" />
+							</div>
+						</div>
 					</div>
-				</div>
-				<SummaryContainer {book} {selectedBook} {abstractionLevel} />
+				{:else}
+					<div class="py-2 flex items-start">
+						<div class="ml-4 flex flex-col">
+							<div class="flex items-center">
+								<p class="pr-2">Abstraction Level:</p>
+								<Dropdown items={Object.values(AbstractionLevel)} bind:value={abstractionLevel} />
+
+								<h3 class="ml-2 mr-2">Style:</h3>
+								<select bind:value={style}>
+									<option value="anime">Anime</option>
+									<option value="realistic">Realistic</option>
+									<option value="cartoon">Cartoon</option>
+									<option value="No style">No style</option>
+								</select>
+								<label for="readingMode" class="ml-2 mr-2">Reading Mode</label>
+								<input type="checkbox" bind:checked={readingMode} id="readingModeID" />
+							</div>
+						</div>
+					</div>
+
+					<div class="py-2 flex items-start">
+						<div class="ml-4 flex flex-col">
+							<h3>Character Name:</h3>
+							<div class="flex items-center">
+								<input
+									class="common-input"
+									bind:value={characterName}
+									type="text"
+									placeholder="Alice"
+									style="width: 300px;"
+								/>
+							</div>
+							<h3>Character Description:</h3>
+							<textarea
+								class="common-input mt-2"
+								bind:value={characterDescription}
+								placeholder="a blond girl in a blue dress"
+								rows="3"
+							/>
+							<button class="mt-2" on:click={addCharacter}>Add Character</button>
+						</div>
+
+						{#if characters.length > 0}
+							<div class="ml-4">
+								<h3>Added Characters:</h3>
+								<ul>
+									{#each characters as character (character.name)}
+										<li>{character.name}: {character.description}</li>
+									{/each}
+								</ul>
+							</div>
+						{/if}
+					</div>
+				{/if}
+				<SummaryContainer
+					{book}
+					{selectedBook}
+					{abstractionLevel}
+					{style}
+					{characters}
+					{readingMode}
+				/>
 			{:catch}
-				<p style="color: red;">{uploadError || 'Book could not be loaded.'}</p>
+				Book could not be loaded.
 			{/await}
 		{/await}
 	</div>

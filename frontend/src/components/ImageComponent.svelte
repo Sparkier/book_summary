@@ -1,53 +1,206 @@
 <script lang="ts">
+	import { version } from '$app/environment';
+
 	export let src: string;
 	export let text: string;
-	let isImageAvailable = true;
+	export let style: string;
+	export let characters: { name: string; description: string }[];
+	export let readingMode: boolean;
+
 	let isGenerating = false;
+	let imageVersions = 0;
+	let prompt: string;
+	let userModifiedPrompt = false;
+
+	const SERVER_IP = '127.0.0.1';
+	const SERVER_PORT = '5000';
+
+	function saveIsGeneratingToStorage() {
+		localStorage.setItem('isGenerating', JSON.stringify(isGenerating));
+	}
+	function loadIsGeneratingFromStorage() {
+		const storedIsGenerating = localStorage.getItem('isGenerating');
+		if (storedIsGenerating !== null) {
+			isGenerating = JSON.parse(storedIsGenerating);
+		}
+	}
+	function getVersionNumber(src: string) {
+		if (src.includes('get_book_summary_image')) {
+			const parts = src.split('/');
+			const book = parts[3];
+			const index = parseInt(parts[4]);
+
+			fetch(`http://${SERVER_IP}:${SERVER_PORT}/api/get_num_book_summary_images/${book}/${index}`)
+				.then((response) => response.json())
+				.then((data) => {
+					imageVersions = data.versions;
+				})
+				.catch((error) => console.error('Error while loading version:', error));
+		} else if (src.includes('get_chapter_summary_image')) {
+			const parts = src.split('/');
+			const book = parts[3];
+			const chapter = parseInt(parts[4]);
+			const index = parseInt(parts[5]);
+
+			fetch(
+				`http://${SERVER_IP}:${SERVER_PORT}/api/get_num_chapter_summary_images/${book}/${chapter}/${index}`
+			)
+				.then((response) => response.json())
+				.then((data) => {
+					imageVersions = data.versions;
+				})
+				.catch((error) => console.error('Error while loading version:', error));
+		} else if (src.includes('get_paragraph_summary_image')) {
+			const parts = src.split('/');
+			const book = parts[3];
+			const chapter = parseInt(parts[4]);
+			const paragraph = parseInt(parts[5]);
+
+			fetch(
+				`http://${SERVER_IP}:${SERVER_PORT}/api/get_num_paragraph_summary_images/${book}/${chapter}/${paragraph}`
+			)
+				.then((response) => response.json())
+				.then((data) => {
+					imageVersions = data.versions;
+				})
+				.catch((error) => console.error('Error while loading version:', error));
+		} else if (src.includes('get_paragraph_image')) {
+			const parts = src.split('/');
+			const book = parts[3];
+			const chapter = parseInt(parts[4]);
+			const paragraph = parseInt(parts[5]);
+
+			fetch(
+				`http://${SERVER_IP}:${SERVER_PORT}/api/get_num_paragraph_images/${book}/${chapter}/${paragraph}`
+			)
+				.then((response) => response.json())
+				.then((data) => {
+					imageVersions = data.versions;
+				})
+				.catch((error) => console.error('Error while loading version:', error));
+		}
+	}
 
 	function handleImageError() {
 		console.error('No Image available');
-		isImageAvailable = false;
+	}
+	async function generate_prompt() {
+		const characterText =
+			characters && characters.length > 0
+				? characters.length === 1
+					? `The character is ${characters[0].name}, ${characters[0].description}.`
+					: `The characters are ${characters
+							.map((char) => `${char.name}, ${char.description}`)
+							.join(' and ')}.`
+				: '';
+
+		let styleText = '';
+
+		if (style !== 'No style') {
+			styleText = `Generate an image in ${style} style.`;
+		}
+
+		const fullText = `${styleText} ${characterText} The scene is: ${text}`;
+		prompt = fullText;
+		return fullText;
 	}
 
 	async function generateImage() {
 		isGenerating = true;
+		saveIsGeneratingToStorage();
+		generate_prompt();
+
 		try {
-			// Add the logic here to send src and text to the server
-			const response = await fetch('http://127.0.0.1:5000/api/generate_image', {
+			const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/api/generate_image`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ src, text })
+				body: JSON.stringify({ src, prompt })
 			});
 
 			if (response.ok) {
-				location.reload();
-				// isImageAvailable = true;
+				getVersionNumber(src);
 				isGenerating = false;
+				saveIsGeneratingToStorage();
 			} else {
 				console.error('Error sending to the server:', response.statusText);
+				isGenerating = false;
 			}
 		} catch (error) {
 			console.error('Error sending to the server:', error);
+			isGenerating = false;
 		}
 	}
+	function updatePromptPeriodically() {
+		if (!userModifiedPrompt) {
+			generate_prompt();
+		}
+	}
+
+	function handleTextareaInput(event: any) {
+		userModifiedPrompt = true;
+		prompt = event.target.value;
+	}
+	function resetUserModifiedPrompt() {
+		userModifiedPrompt = false;
+		generate_prompt();
+	}
+	setInterval(updatePromptPeriodically, 500);
+	saveIsGeneratingToStorage();
+	getVersionNumber(src);
+	loadIsGeneratingFromStorage();
+	generate_prompt();
 </script>
 
-<div>
-	{#if isImageAvailable}
-		<img
-			{src}
-			alt="Summary of the text next to it."
-			class={`m-1 w-48`}
-			on:error={() => handleImageError()}
-		/>
-		<button on:click={() => generateImage()} class="m-1 w-48">
-			{isGenerating ? 'Generating...' : 'Generate a new image of the text'}</button
-		>
+<div class="w-2/3">
+	{#if readingMode}
+		{#if imageVersions > 0}
+			<div class="{readingMode ? '' : 'w-full overflow-x-scroll'}  flex">
+				{#each [...Array(imageVersions)].map((_, index) => index) as version}
+					<img
+						src={`${src}${version > 0 ? `/${version}` : ''}`}
+						alt="Summary of the text next to it."
+						class="m-1 block max-w-48 max-h-48"
+						on:error={() => handleImageError()}
+					/>
+				{/each}
+			</div>
+		{/if}
+	{:else if imageVersions > 0}
+		<div class="flex flex-col md:flex-row w-full">
+			<div class="overflow-x-scroll flex max-w-49">
+				{#each [...Array(imageVersions)].map((_, index) => index) as version}
+					<img
+						src={`${src}${version > 0 ? `/${version}` : ''}`}
+						alt="Summary of the text next to it."
+						class="m-1 block max-w-48 max-h-48"
+						on:error={() => handleImageError()}
+					/>
+				{/each}
+			</div>
+			<div class="ml-4 flex flex-col w-full">
+				<h3>Prompt:</h3>
+				<textarea on:input={handleTextareaInput} rows="4" class="mt-2 w-full">{prompt}</textarea>
+				<div class="flex mt-2">
+					<div>
+						{#if userModifiedPrompt}
+							<button class="m-1" on:click={resetUserModifiedPrompt}>
+								Reset to the generated prompt
+							</button>
+						{/if}
+					</div>
+					<div class="ml-auto">
+						<button on:click={() => generateImage()} class="m-1">
+							{isGenerating ? 'Generating...' : 'Generate a new image of the text'}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	{:else}
-		<button on:click={() => generateImage()} class="m-1 w-48">
-			{isGenerating ? 'Generating...' : 'Generate image of the text'}</button
-		>
+		<button on:click={() => generateImage()} class="m-1">
+			{isGenerating ? 'Generating...' : 'Generate image of the text'}
+		</button>
 	{/if}
 </div>
