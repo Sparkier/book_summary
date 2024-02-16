@@ -1,10 +1,11 @@
 """Server interface for the latent retrieval demo."""
 import json
-import subprocess
+import asyncio
 from pathlib import Path
 from flask import Flask, jsonify, send_file, request
 from werkzeug.utils import secure_filename
 from ebooklib import epub
+from image_generator import generate_image_from_text
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -15,7 +16,7 @@ TEXT_TYPE = {'ContentType': 'text/plain'}
 JSON_TYPE = {'ContentType': 'application/json'}
 DATA_DIR = Path('data')
 UPLOAD_FOLDER = Path('data')
-ALLOWED_EXTENSIONS = {'epub'}
+ALLOWED_EXTENSIONS = {'.epub'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -29,11 +30,11 @@ def allowed_file(filename: str):
     Returns:
         (Boolean): True or False
     """
-    return Path(filename).is_file() and Path(filename).suffix in ALLOWED_EXTENSIONS
+    return Path(filename).suffix in ALLOWED_EXTENSIONS
 
 
 @app.route('/api/generate_image', methods=['POST'])
-def generate_image():
+async def generate_image():
     """Generate an image on the server based on client input.
 
     Returns:
@@ -41,7 +42,6 @@ def generate_image():
     """
     data = request.get_json()
     src = data.get('src')
-
     try:
         # Extract book, chapter, paragraph, index from the src path
         _, _, route_type, book, *rest = src.split('/')
@@ -63,28 +63,26 @@ def generate_image():
                 f"chapter-{chapter:03d}_paragraph-{paragraph:04d}.png"
         else:
             return jsonify({'error': 'Unknown route type'}), ERROR_STATUS
+
         counter = 1
-        text = data.get('prompt')
+        text = data.get('text')
         basefilename = filename
         while filename.exists():
             # If the file exists, generate a new filename with an incrementing counter
             filename = basefilename.with_stem(
-                f"{filename.stem}-version-{counter}")
+                f"{basefilename.stem}-version-{counter}")
             counter += 1
-
-        image_generator_command = [
-            "python", "image_generator.py",
-            "--text", text,
-            "--output_path", str(filename)
-        ]
-        subprocess.run(image_generator_command, check=True)
+        output_path = str(filename)
+        await asyncio.create_subprocess_exec(
+            generate_image_from_text(text, output_path))
         return jsonify({'message': 'Image successfully generated'}), OK_STATUS
-    except subprocess.CalledProcessError as e:
-        return jsonify({'error': f'Error generating image: {e.stderr.decode()}'}), ERROR_STATUS
+
+    except (FileNotFoundError, ValueError) as e:
+        return jsonify({'error': f'Error generating image: {str(e)}'}), ERROR_STATUS
 
 
 @app.route('/api/upload_book', methods=['POST'])
-def upload_book():
+async def upload_book():
     """Upload a book in EPUB format and create a folder with the book title.
 
     Returns:
@@ -94,7 +92,6 @@ def upload_book():
         return jsonify({'error': 'No file part'}), ERROR_STATUS
 
     file = request.files['file']
-
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), ERROR_STATUS
 
@@ -120,7 +117,7 @@ def upload_book():
                 "--input_file", str(folder_path / filename),
                 "--output_dir", str(folder_path)
             ]
-            subprocess.run(summarizer_command, check=False)
+            await asyncio.create_subprocess_shell(' '.join(summarizer_command))
 
             return jsonify({'message': 'File successfully uploaded', 'title': title}), OK_STATUS
         return jsonify({'error': 'Failed to extract book title'}), ERROR_STATUS
