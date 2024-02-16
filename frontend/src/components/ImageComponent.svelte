@@ -1,8 +1,3 @@
-<script context="module">
-	import { PUBLIC_DEV_BASE_URL } from '$env/static/public';
-	const API = PUBLIC_DEV_BASE_URL;
-</script>
-
 <script lang="ts">
 	export let src: string;
 	export let text: string;
@@ -17,7 +12,7 @@
 	async function generateImage() {
 		isGenerating = true;
 		try {
-			const response = await fetch(`${API}/api/generate_image`, {
+			const response = await fetch('http://127.0.0.1:5000/api/generate_image', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

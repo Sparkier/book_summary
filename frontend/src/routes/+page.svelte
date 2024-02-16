@@ -1,8 +1,3 @@
-<script context="module">
-	import { PUBLIC_DEV_BASE_URL } from '$env/static/public';
-	const API = PUBLIC_DEV_BASE_URL;
-</script>
-
 <script lang="ts">
 	import '../app.css';
 	import SummaryContainer from '../components/SummaryContainer.svelte';
@@ -33,7 +28,7 @@
 		formData.append('file', file);
 
 		try {
-			const response = await fetch('${API}/api/upload_book', {
+			const response = await fetch('http://127.0.0.1:5000/api/upload_book', {
 				method: 'POST',
 				body: formData
 			});
