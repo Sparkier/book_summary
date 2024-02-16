@@ -16,16 +16,13 @@
 		const target = event.target as HTMLInputElement;
 
 		if (!target?.files || target.files.length === 0) {
-			// Handle the case where files are null or empty
 			uploadError = 'Wrong file selected.';
 			return;
 		}
 
 		const file = target.files[0];
-
-		// Set isGenerating to true before uploading the book
 		isGenerating = true;
-		uploadError = ''; // Clear any previous errors
+		uploadError = '';
 
 		const formData = new FormData();
 		formData.append('file', file);
@@ -39,10 +36,11 @@
 			if (!response.ok) {
 				const data = await response.json();
 				// Set the error message
+				console.log(data.error);
+
 				uploadError = data.error || 'Upload failed';
 			} else {
-				// Reload the page after successful generation
-				location.reload();
+				uploadError = 'An error occurred during upload';
 			}
 		} catch (error) {
 			// Set the error message

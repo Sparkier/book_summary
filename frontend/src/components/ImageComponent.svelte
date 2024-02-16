@@ -12,7 +12,6 @@
 	async function generateImage() {
 		isGenerating = true;
 		try {
-			// Add the logic here to send src and text to the server
 			const response = await fetch('http://127.0.0.1:5000/api/generate_image', {
 				method: 'POST',
 				headers: {
@@ -22,8 +21,6 @@
 			});
 
 			if (response.ok) {
-				location.reload();
-				// isImageAvailable = true;
 				isGenerating = false;
 			} else {
 				console.error('Error sending to the server:', response.statusText);
