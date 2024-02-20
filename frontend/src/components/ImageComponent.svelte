@@ -1,6 +1,6 @@
 <script context="module">
-	import { PUBLIC_DEV_BASE_URL } from '$env/static/public';
-	const API = PUBLIC_DEV_BASE_URL;
+	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	const API = PUBLIC_BACKEND_URL;
 </script>
 
 <script lang="ts">
