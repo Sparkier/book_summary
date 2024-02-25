@@ -1,3 +1,8 @@
+<script context="module">
+	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	const API = PUBLIC_BACKEND_URL;
+</script>
+
 <script lang="ts">
 	import '../app.css';
 	import SummaryContainer from '../components/SummaryContainer.svelte';
@@ -8,10 +13,62 @@
 	let selectedBook = 'Alices Adventures in Wonderland';
 
 	let abstractionLevel = AbstractionLevel.BOOK;
+	let fileInput: HTMLInputElement;
+	let isGenerating = false;
+	let uploadError = '';
+
+	async function handleFileUpload(event: Event) {
+		const target = event.target as HTMLInputElement;
+
+		if (!target?.files || target.files.length === 0) {
+			uploadError = 'Wrong file selected.';
+			return;
+		}
+
+		const file = target.files[0];
+		isGenerating = true;
+		uploadError = '';
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const response = await fetch(`${API}/api/upload_book`, {
+				method: 'POST',
+				body: formData
+			});
+			if (!response.ok) {
+				const data = await response.json();
+				// Set the error message
+				uploadError = data.error || 'Upload failed';
+			} else {
+				isGenerating = true;
+			}
+		} catch (error) {
+			// Set the error message
+			uploadError = 'An error occurred during upload';
+		} finally {
+			// Set isGenerating back to false after the upload is complete
+			isGenerating = false;
+		}
+	}
 </script>
 
 <main class="overflow-hidden h-full">
 	<div class="flex flex-col h-full">
+		<button on:click={() => fileInput.click()} disabled={isGenerating}>
+			{isGenerating ? 'Generating...' : 'Upload file'}
+		</button>
+		{#if uploadError}
+			<p class="text-red-600">{uploadError}</p>
+		{/if}
+		<input
+			type="file"
+			accept=".epub"
+			style="display: none"
+			bind:this={fileInput}
+			on:change={handleFileUpload}
+		/>
 		{#await fetchBooks() then books}
 			<select bind:value={selectedBook}>
 				{#each books as book}
@@ -38,7 +95,7 @@
 				</div>
 				<SummaryContainer {book} {selectedBook} {abstractionLevel} />
 			{:catch}
-				Book could not be loaded.
+				<p class="text-red-600">{'Book could not be loaded.'}</p>
 			{/await}
 		{/await}
 	</div>

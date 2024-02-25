@@ -66,5 +66,5 @@ if __name__ == '__main__':
     book_summary = text_summarization(
         summarization_model, ''.join(chapter_summaries))
     book["book_summary"] = book_summary
-    with open(Path(output_dir, input_file.stem + '_summarized.json'), 'w', encoding='utf-8') as f:
+    with open(Path(output_dir, 'summarized.json'), 'w', encoding='utf-8') as f:
         json.dump({"book": book}, f)
