@@ -18,9 +18,6 @@
 	let prompt: string;
 	let userModifiedPrompt = false;
 
-	const SERVER_IP = '127.0.0.1';
-	const SERVER_PORT = '5000';
-
 	function saveIsGeneratingToStorage() {
 		localStorage.setItem('isGenerating', JSON.stringify(isGenerating));
 	}
@@ -36,59 +33,53 @@
 			const book = parts[3];
 			const index = parseInt(parts[4]);
 
-			fetch(`http://${SERVER_IP}:${SERVER_PORT}/api/get_num_book_summary_images/${book}/${index}`)
+			fetch(`${API}/api/get_num_book_summary_images/${book}/${index}`)
 				.then((response) => response.json())
 				.then((data) => {
 					imageVersions = data.versions;
 				})
-				.catch((error) => console.error('Error while loading version:', error));
+				.catch((error) => (errorMessage = 'Error while loading version: ' + error));
 		} else if (src.includes('get_chapter_summary_image')) {
 			const parts = src.split('/');
 			const book = parts[3];
 			const chapter = parseInt(parts[4]);
 			const index = parseInt(parts[5]);
 
-			fetch(
-				`http://${SERVER_IP}:${SERVER_PORT}/api/get_num_chapter_summary_images/${book}/${chapter}/${index}`
-			)
+			fetch(`${API}/api/get_num_chapter_summary_images/${book}/${chapter}/${index}`)
 				.then((response) => response.json())
 				.then((data) => {
 					imageVersions = data.versions;
 				})
-				.catch((error) => console.error('Error while loading version:', error));
+				.catch((error) => (errorMessage = 'Error while loading version: ' + error));
 		} else if (src.includes('get_paragraph_summary_image')) {
 			const parts = src.split('/');
 			const book = parts[3];
 			const chapter = parseInt(parts[4]);
 			const paragraph = parseInt(parts[5]);
 
-			fetch(
-				`http://${SERVER_IP}:${SERVER_PORT}/api/get_num_paragraph_summary_images/${book}/${chapter}/${paragraph}`
-			)
+			fetch(`${API}/api/get_num_paragraph_summary_images/${book}/${chapter}/${paragraph}`)
 				.then((response) => response.json())
 				.then((data) => {
 					imageVersions = data.versions;
 				})
-				.catch((error) => console.error('Error while loading version:', error));
+				.catch((error) => (errorMessage = 'Error while loading version: ' + error));
 		} else if (src.includes('get_paragraph_image')) {
 			const parts = src.split('/');
 			const book = parts[3];
 			const chapter = parseInt(parts[4]);
 			const paragraph = parseInt(parts[5]);
 
-			fetch(
-				`http://${SERVER_IP}:${SERVER_PORT}/api/get_num_paragraph_images/${book}/${chapter}/${paragraph}`
-			)
+			fetch(`${API}/api/get_num_paragraph_images/${book}/${chapter}/${paragraph}`)
 				.then((response) => response.json())
 				.then((data) => {
 					imageVersions = data.versions;
 				})
-				.catch((error) => console.error('Error while loading version:', error));
+				.catch((error) => (errorMessage = 'Error while loading version: ' + error));
 		}
 	}
 
 	function handleImageError() {
-		console.error('No Image available');
+		errorMessage = 'No Image available';
 	}
 	async function generate_prompt() {
 		const characterText =
@@ -203,6 +194,9 @@
 						<button on:click={() => generateImage()} class="m-1">
 							{isGenerating ? 'Generating...' : 'Generate a new image of the text'}
 						</button>
+						{#if errorMessage}
+							<p class="text-red-600">{errorMessage}</p>
+						{/if}
 					</div>
 				</div>
 			</div>
@@ -211,5 +205,8 @@
 		<button on:click={() => generateImage()} class="m-1">
 			{isGenerating ? 'Generating...' : 'Generate image of the text'}
 		</button>
+		{#if errorMessage}
+			<p class="text-red-600">{errorMessage}</p>
+		{/if}
 	{/if}
 </div>
