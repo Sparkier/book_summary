@@ -1,3 +1,8 @@
+<script context="module">
+	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	const API = PUBLIC_BACKEND_URL;
+</script>
+
 <script lang="ts">
 	import '../app.css';
 	import SummaryContainer from '../components/SummaryContainer.svelte';
@@ -48,17 +53,15 @@
 		formData.append('file', file);
 
 		try {
-			const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/api/upload_book`, {
+			const response = await fetch(`${API}/api/upload_book`, {
 				method: 'POST',
 				body: formData
 			});
-
 			if (!response.ok) {
 				const data = await response.json();
 				uploadError = data.error || 'Upload failed';
 			} else {
-				// Reload after new book is uploaded
-				location.reload();
+				isGenerating = true;
 			}
 		} catch (error) {
 			uploadError = 'An error occurred during upload';
@@ -73,6 +76,9 @@
 		<button on:click={() => fileInput.click()} disabled={isGenerating}>
 			{isGenerating ? 'Generating...' : 'Upload file'}
 		</button>
+		{#if uploadError}
+			<p class="text-red-600">{uploadError}</p>
+		{/if}
 		<input
 			type="file"
 			accept=".epub"
@@ -177,7 +183,7 @@
 					{readingMode}
 				/>
 			{:catch}
-				Book could not be loaded.
+				<p class="text-red-600">{'Book could not be loaded.'}</p>
 			{/await}
 		{/await}
 	</div>

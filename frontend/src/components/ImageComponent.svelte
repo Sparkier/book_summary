@@ -1,3 +1,8 @@
+<script context="module">
+	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	const API = PUBLIC_BACKEND_URL;
+</script>
+
 <script lang="ts">
 	import { version } from '$app/environment';
 
@@ -8,6 +13,7 @@
 	export let readingMode: boolean;
 
 	let isGenerating = false;
+	let errorMessage = '';
 	let imageVersions = 0;
 	let prompt: string;
 	let userModifiedPrompt = false;
@@ -106,12 +112,14 @@
 	}
 
 	async function generateImage() {
+		//clear old error messages
+		errorMessage = '';
 		isGenerating = true;
 		saveIsGeneratingToStorage();
 		generate_prompt();
 
 		try {
-			const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/api/generate_image`, {
+			const response = await fetch(`${API}/api/generate_image`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -124,11 +132,12 @@
 				isGenerating = false;
 				saveIsGeneratingToStorage();
 			} else {
-				console.error('Error sending to the server:', response.statusText);
-				isGenerating = false;
+				const responseData = await response.json();
+				errorMessage = responseData.error || 'Error generating image';
 			}
 		} catch (error) {
-			console.error('Error sending to the server:', error);
+			errorMessage = 'An unexpected error occurred while generating image';
+		} finally {
 			isGenerating = false;
 		}
 	}

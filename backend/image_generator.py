@@ -1,24 +1,27 @@
-#! /usr/bin/env python3
 """Generate an image from a text prompt using Stable Diffusion."""
-import argparse
 import torch
-from diffusers import StableDiffusionPipeline
+from diffusers import AutoPipelineForText2Image, DEISMultistepScheduler
 
 
-def generate_image_from_text(text):
-    """Generate an image with the Stable Diffusion model.
+def generate_image_from_text(text, output_path):
+    """Generate an image with the Stable Diffusion model asynchronously.
 
     Args:
         text (str): The text used for image generation.
+        output_path (str): The file path where the image should be saved.
 
     Returns:
-        PIL.Image: The generated image.
+        str: The file path where the image is saved.
     """
-    pipeline = StableDiffusionPipeline.from_pretrained(
-        "CompVis/stable-diffusion-v1-4", torch_dtype=torch.float32)
+    pipeline = AutoPipelineForText2Image.from_pretrained(
+        'lykon/dreamshaper-8', torch_dtype=torch.float32, variant="fp16")
+    pipeline.scheduler = DEISMultistepScheduler.from_config(
+        pipeline.scheduler.config)
     prompt = [text]
     images = pipeline(prompt).images
-    return images[0]
+    generated_image = images[0]
+    save_image(generated_image, output_path)
+    return output_path
 
 
 def save_image(image, output_path):
@@ -29,21 +32,3 @@ def save_image(image, output_path):
         output_path (str): The file path where the image should be saved.
     """
     image.save(output_path)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Generate image from text using Stable Diffusion.')
-    parser.add_argument('--text', type=str,
-                        help='text prompt for image generation')
-    parser.add_argument('--output_path', type=str,
-                        help='output path for the generated image')
-
-    args = parser.parse_args()
-
-    if not args.text or not args.output_path:
-        print("Please provide both --text and --output_path arguments.")
-    else:
-        generated_image = generate_image_from_text(args.text)
-        save_image(generated_image, args.output_path)
-        print(f"Image generated and saved at: {args.output_path}")
