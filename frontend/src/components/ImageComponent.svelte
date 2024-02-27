@@ -108,7 +108,7 @@
 		isGenerating = true;
 		saveIsGeneratingToStorage();
 		generate_prompt();
-    
+
 		try {
 			const response = await fetch(`${API}/api/generate_image`, {
 				method: 'POST',
@@ -209,9 +209,5 @@
 		{#if errorMessage}
 			<p class="text-red-600">{errorMessage}</p>
 		{/if}
-	{:else}
-		<button on:click={() => generateImage()} class="m-1 w-48">
-			{isGenerating ? 'Generating...' : 'Generate image of the text'}
-		</button>
 	{/if}
 </div>
