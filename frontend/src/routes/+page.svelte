@@ -86,7 +86,6 @@
 			bind:this={fileInput}
 			on:change={handleFileUpload}
 		/>
-
 		{#await fetchBooks() then books}
 			<select bind:value={selectedBook}>
 				{#each books as book}
