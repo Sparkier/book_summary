@@ -29,9 +29,7 @@ Clone the Project from GitHub and open the book_summary folder.
 
 As an example Visual Studio Code is used here. Check that you have the Python extension installed.
 
-### General setup
-
-The general setup is only necessary the first time.
+### One-time setup
 
 #### Environment (Recommended, but optional)
 

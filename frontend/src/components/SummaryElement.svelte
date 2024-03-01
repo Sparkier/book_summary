@@ -9,14 +9,6 @@
 	export let style: string;
 	export let characters: { name: string; description: string }[];
 	export let readingMode: boolean;
-
-	function loadCharactersFromStorage() {
-		const storedCharacters = localStorage.getItem('characters');
-		if (storedCharacters !== null) {
-			characters = JSON.parse(storedCharacters);
-		}
-	}
-	loadCharactersFromStorage();
 </script>
 
 <div transition:fade>

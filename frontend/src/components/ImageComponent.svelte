@@ -4,13 +4,13 @@
 </script>
 
 <script lang="ts">
-	import { version } from '$app/environment';
-
+	import { writable } from 'svelte/store';
 	export let src: string;
 	export let text: string;
 	export let style: string;
 	export let characters: { name: string; description: string }[];
 	export let readingMode: boolean;
+	export const isGeneratingStore = writable(false);
 
 	let isGenerating = false;
 	let errorMessage = '';
@@ -18,70 +18,59 @@
 	let prompt: string;
 	let userModifiedPrompt = false;
 
-	function saveIsGeneratingToStorage() {
-		localStorage.setItem('isGenerating', JSON.stringify(isGenerating));
+	export function saveIsGeneratingToStore() {
+		isGeneratingStore.set(isGenerating);
 	}
-	function loadIsGeneratingFromStorage() {
-		const storedIsGenerating = localStorage.getItem('isGenerating');
-		if (storedIsGenerating !== null) {
-			isGenerating = JSON.parse(storedIsGenerating);
-		}
-	}
-	function getVersionNumber(src: string) {
-		if (src.includes('get_book_summary_image')) {
-			const parts = src.split('/');
-			const book = parts[3];
-			const index = parseInt(parts[4]);
 
-			fetch(`${API}/api/get_num_book_summary_images/${book}/${index}`)
-				.then((response) => response.json())
-				.then((data) => {
-					imageVersions = data.versions;
-				})
-				.catch((error) => (errorMessage = 'Error while loading version: ' + error));
+	function loadIsGeneratingFromStore() {
+		// Subscribe to changes in the isGeneratingStore
+		const unsubscribe = isGeneratingStore.subscribe((value) => {
+			isGenerating = value;
+		});
+		unsubscribe();
+	}
+
+	function getVersionNumber(src: string) {
+		const parts = src.split('/');
+		const book = parts[3];
+
+		let fetchUrl = '';
+
+		if (src.includes('get_book_summary_image')) {
+			const index = parseInt(parts[4]);
+			fetchUrl = `${API}/api/get_num_book_summary_images/${book}/${index}`;
 		} else if (src.includes('get_chapter_summary_image')) {
-			const parts = src.split('/');
-			const book = parts[3];
 			const chapter = parseInt(parts[4]);
 			const index = parseInt(parts[5]);
-
-			fetch(`${API}/api/get_num_chapter_summary_images/${book}/${chapter}/${index}`)
-				.then((response) => response.json())
-				.then((data) => {
-					imageVersions = data.versions;
-				})
-				.catch((error) => (errorMessage = 'Error while loading version: ' + error));
+			fetchUrl = `${API}/api/get_num_chapter_summary_images/${book}/${chapter}/${index}`;
 		} else if (src.includes('get_paragraph_summary_image')) {
-			const parts = src.split('/');
-			const book = parts[3];
 			const chapter = parseInt(parts[4]);
 			const paragraph = parseInt(parts[5]);
-
-			fetch(`${API}/api/get_num_paragraph_summary_images/${book}/${chapter}/${paragraph}`)
-				.then((response) => response.json())
-				.then((data) => {
-					imageVersions = data.versions;
-				})
-				.catch((error) => (errorMessage = 'Error while loading version: ' + error));
+			fetchUrl = `${API}/api/get_num_paragraph_summary_images/${book}/${chapter}/${paragraph}`;
 		} else if (src.includes('get_paragraph_image')) {
-			const parts = src.split('/');
-			const book = parts[3];
 			const chapter = parseInt(parts[4]);
 			const paragraph = parseInt(parts[5]);
-
-			fetch(`${API}/api/get_num_paragraph_images/${book}/${chapter}/${paragraph}`)
-				.then((response) => response.json())
-				.then((data) => {
-					imageVersions = data.versions;
-				})
-				.catch((error) => (errorMessage = 'Error while loading version: ' + error));
+			fetchUrl = `${API}/api/get_num_paragraph_images/${book}/${chapter}/${paragraph}`;
+		} else {
+			errorMessage = 'Unknown image type';
+			return;
 		}
+
+		fetch(fetchUrl)
+			.then((response) => response.json())
+			.then((data) => {
+				imageVersions = data.versions;
+			})
+			.catch((error) => {
+				errorMessage = 'Error while loading version: ' + error;
+			});
 	}
 
 	function handleImageError() {
 		errorMessage = 'No Image available';
 	}
-	async function generate_prompt() {
+
+	async function get_updated_prompt() {
 		const characterText =
 			characters && characters.length > 0
 				? characters.length === 1
@@ -106,8 +95,8 @@
 		//clear old error messages
 		errorMessage = '';
 		isGenerating = true;
-		saveIsGeneratingToStorage();
-		generate_prompt();
+		saveIsGeneratingToStore();
+		get_updated_prompt();
 
 		try {
 			const response = await fetch(`${API}/api/generate_image`, {
@@ -122,7 +111,7 @@
 			if (response.ok) {
 				getVersionNumber(src);
 				isGenerating = false;
-				saveIsGeneratingToStorage();
+				saveIsGeneratingToStore();
 			} else {
 				const responseData = await response.json();
 				errorMessage = responseData.error || 'Error generating image';
@@ -133,25 +122,29 @@
 			isGenerating = false;
 		}
 	}
+
 	function updatePromptPeriodically() {
 		if (!userModifiedPrompt) {
-			generate_prompt();
+			get_updated_prompt();
 		}
 	}
 
-	function handleTextareaInput(event: any) {
+	function handleTextareaInput(event: Event) {
+		const target = event.target as HTMLTextAreaElement;
 		userModifiedPrompt = true;
-		prompt = event.target.value;
+		prompt = target.value;
 	}
+
 	function resetUserModifiedPrompt() {
 		userModifiedPrompt = false;
-		generate_prompt();
+		get_updated_prompt();
 	}
+
 	setInterval(updatePromptPeriodically, 500);
-	saveIsGeneratingToStorage();
+	saveIsGeneratingToStore();
 	getVersionNumber(src);
-	loadIsGeneratingFromStorage();
-	generate_prompt();
+	loadIsGeneratingFromStore();
+	get_updated_prompt();
 </script>
 
 <div class="w-2/3">
