@@ -4,31 +4,17 @@
 </script>
 
 <script lang="ts">
-	import { writable } from 'svelte/store';
 	export let src: string;
 	export let text: string;
 	export let style: string;
 	export let characters: { name: string; description: string }[];
 	export let readingMode: boolean;
-	export const isGeneratingStore = writable(false);
 
 	let isGenerating = false;
 	let errorMessage = '';
 	let imageVersions = 0;
 	let prompt: string;
 	let userModifiedPrompt = false;
-
-	export function saveIsGeneratingToStore() {
-		isGeneratingStore.set(isGenerating);
-	}
-
-	function loadIsGeneratingFromStore() {
-		// Subscribe to changes in the isGeneratingStore
-		const unsubscribe = isGeneratingStore.subscribe((value) => {
-			isGenerating = value;
-		});
-		unsubscribe();
-	}
 
 	function getVersionNumber(src: string) {
 		const parts = src.split('/');
@@ -95,7 +81,6 @@
 		//clear old error messages
 		errorMessage = '';
 		isGenerating = true;
-		saveIsGeneratingToStore();
 		get_updated_prompt();
 
 		try {
@@ -111,7 +96,6 @@
 			if (response.ok) {
 				getVersionNumber(src);
 				isGenerating = false;
-				saveIsGeneratingToStore();
 			} else {
 				const responseData = await response.json();
 				errorMessage = responseData.error || 'Error generating image';
@@ -141,9 +125,7 @@
 	}
 
 	setInterval(updatePromptPeriodically, 500);
-	saveIsGeneratingToStore();
 	getVersionNumber(src);
-	loadIsGeneratingFromStore();
 	get_updated_prompt();
 </script>
 
