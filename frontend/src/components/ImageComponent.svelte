@@ -170,14 +170,12 @@
 				<div class="flex mt-2">
 					<div>
 						{#if userModifiedPrompt}
-							<button class="m-1" on:click={resetUserModifiedPrompt}>
-								Reset to the generated prompt
-							</button>
+							<button class="m-1" on:click={resetUserModifiedPrompt}> Reset prompt </button>
 						{/if}
 					</div>
 					<div class="ml-auto">
 						<button on:click={() => generateImage()} class="m-1">
-							{isGenerating ? 'Generating...' : 'Generate a new image of the text'}
+							{isGenerating ? 'Generating...' : 'Generate image'}
 						</button>
 						{#if errorMessage}
 							<p class="text-red-600">{errorMessage}</p>
@@ -188,7 +186,7 @@
 		</div>
 	{:else}
 		<button on:click={() => generateImage()} class="m-1">
-			{isGenerating ? 'Generating...' : 'Generate image of the text'}
+			{isGenerating ? 'Generating...' : 'Generate image'}
 		</button>
 		{#if errorMessage}
 			<p class="text-red-600">{errorMessage}</p>
