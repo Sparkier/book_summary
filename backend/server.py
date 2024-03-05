@@ -65,7 +65,7 @@ async def generate_image():
             return jsonify({'error': 'Unknown route type'}), ERROR_STATUS
 
         counter = 1
-        text = data.get('text')
+        text = data.get('prompt')
         basefilename = filename
         while filename.exists():
             # If the file exists, generate a new filename with an incrementing counter

@@ -8,6 +8,9 @@
 	export let book: Book;
 	export let selectedBook: string;
 	export let abstractionLevel: AbstractionLevel;
+	export let style: string;
+	export let characters: { name: string; description: string }[];
+	export let readingMode: boolean;
 </script>
 
 <div class="flex flex-col overflow-auto">
@@ -15,6 +18,9 @@
 		<SummaryElement
 			text={book.book_summary}
 			image={`/api/get_book_summary_image/${selectedBook}/0`}
+			{style}
+			{characters}
+			{readingMode}
 		/>
 	{:else}
 		{#each book.chapters as chapter, chapterIndex}
@@ -23,6 +29,9 @@
 				<SummaryElement
 					text={chapter.chapter_summary}
 					image={`/api/get_chapter_summary_image/${selectedBook}/${chapterIndex + 1}/0`}
+					{style}
+					{characters}
+					{readingMode}
 				/>
 			{:else if abstractionLevel === AbstractionLevel.PARAGRAPH}
 				{#each chapter.paragraph_summaries as paragraphSummary, paragraphIndex}
@@ -31,6 +40,9 @@
 						image={`/api/get_paragraph_summary_image/${selectedBook}/${
 							chapterIndex + 1
 						}/${paragraphIndex}`}
+						{style}
+						{characters}
+						{readingMode}
 					/>
 				{/each}
 			{:else}
@@ -38,6 +50,9 @@
 					<SummaryElement
 						text={paragraph}
 						image={`/api/get_paragraph_image/${selectedBook}/${chapterIndex + 1}/${paragraphIndex}`}
+						{style}
+						{characters}
+						{readingMode}
 					/>
 				{/each}
 			{/if}
