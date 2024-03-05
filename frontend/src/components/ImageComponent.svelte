@@ -57,11 +57,20 @@
 	}
 
 	async function get_updated_prompt() {
+		let charactersInText: { name: string; description: string }[] = [];
+
+		// Extract characters from the text
+		characters.forEach((char) => {
+			if (text.includes(char.name)) {
+				charactersInText.push({ name: char.name, description: char.description });
+			}
+		});
+
 		const characterText =
-			characters && characters.length > 0
-				? characters.length === 1
-					? `The character is ${characters[0].name}, ${characters[0].description}.`
-					: `The characters are ${characters
+			charactersInText.length > 0
+				? charactersInText.length === 1
+					? `The character is ${charactersInText[0].name}, ${charactersInText[0].description}.`
+					: `The characters are ${charactersInText
 							.map((char) => `${char.name}, ${char.description}`)
 							.join(' and ')}.`
 				: '';
