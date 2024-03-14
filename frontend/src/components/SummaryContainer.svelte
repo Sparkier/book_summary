@@ -17,7 +17,7 @@
 	{#if abstractionLevel === AbstractionLevel.BOOK}
 		<SummaryElement
 			text={book.book_summary}
-			image={`/api/get_book_summary_image/${selectedBook}/0`}
+			image={`/api/books/${selectedBook}/images`}
 			{style}
 			{characters}
 			{readingMode}
@@ -28,7 +28,7 @@
 			{#if abstractionLevel === AbstractionLevel.CHAPTER}
 				<SummaryElement
 					text={chapter.chapter_summary}
-					image={`/api/get_chapter_summary_image/${selectedBook}/${chapterIndex + 1}/0`}
+					image={`/api/books/${selectedBook}/chapters/${chapterIndex + 1}/images`}
 					{style}
 					{characters}
 					{readingMode}
@@ -37,9 +37,9 @@
 				{#each chapter.paragraph_summaries as paragraphSummary, paragraphIndex}
 					<SummaryElement
 						text={paragraphSummary}
-						image={`/api/get_paragraph_summary_image/${selectedBook}/${
+						image={`/api/books/${selectedBook}/chapters/${
 							chapterIndex + 1
-						}/${paragraphIndex}`}
+						}/summarized_paragraphs/${paragraphIndex}/images`}
 						{style}
 						{characters}
 						{readingMode}
@@ -49,7 +49,9 @@
 				{#each chapter.paragraphs as paragraph, paragraphIndex}
 					<SummaryElement
 						text={paragraph}
-						image={`/api/get_paragraph_image/${selectedBook}/${chapterIndex + 1}/${paragraphIndex}`}
+						image={`/api/books/${selectedBook}/chapters/${
+							chapterIndex + 1
+						}/paragraphs/${paragraphIndex}/images`}
 						{style}
 						{characters}
 						{readingMode}
