@@ -39,12 +39,10 @@
 			const paragraph = parseInt(parts[7]);
 			fetchUrl = `${API}/api/books/${book}/chapters/${chapter}/paragraphs/${paragraph}/image/versions`;
 		}
-		console.log(fetchUrl);
 		fetch(fetchUrl)
 			.then((response) => response.json())
 			.then((data) => {
 				imageVersions = data.versions;
-				console.log(imageVersions);
 			})
 			.catch((error) => {
 				errorMessage = 'Error while loading version: ' + error;
