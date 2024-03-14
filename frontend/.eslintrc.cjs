@@ -28,6 +28,6 @@ module.exports = {
 		}
 	],
 	rules: {
-		'no-console': 'error',
+		'no-console': 'error'
 	}
 };
