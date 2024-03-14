@@ -22,26 +22,23 @@
 
 		let fetchUrl = '';
 
-		if (src.includes('get_book_summary_image')) {
-			const index = parseInt(parts[4]);
-			fetchUrl = `${API}/api/get_num_book_summary_images/${book}/${index}`;
-		} else if (src.includes('get_chapter_summary_image')) {
-			const chapter = parseInt(parts[4]);
-			const index = parseInt(parts[5]);
-			fetchUrl = `${API}/api/get_num_chapter_summary_images/${book}/${chapter}/${index}`;
-		} else if (src.includes('get_paragraph_summary_image')) {
-			const chapter = parseInt(parts[4]);
-			const paragraph = parseInt(parts[5]);
-			fetchUrl = `${API}/api/get_num_paragraph_summary_images/${book}/${chapter}/${paragraph}`;
-		} else if (src.includes('get_paragraph_image')) {
-			const chapter = parseInt(parts[4]);
-			const paragraph = parseInt(parts[5]);
-			fetchUrl = `${API}/api/get_num_paragraph_images/${book}/${chapter}/${paragraph}`;
-		} else {
-			errorMessage = 'Unknown image type';
-			return;
+		if (src.includes('/images')) {
+			fetchUrl = `${API}/api/books/${book}/image/versions`;
 		}
-
+		if (src.includes('/chapters')) {
+			const chapter = parseInt(parts[5]);
+			fetchUrl = `${API}/api/books/${book}/chapters/${chapter}/image/versions`;
+		}
+		if (src.includes('/summarized_paragraphs')) {
+			const chapter = parseInt(parts[5]);
+			const paragraph = parseInt(parts[7]);
+			fetchUrl = `${API}/api/books/${book}/chapters/${chapter}/summarized_paragraphs/${paragraph}/image/versions`;
+		}
+		if (src.includes('/paragraphs')) {
+			const chapter = parseInt(parts[5]);
+			const paragraph = parseInt(parts[7]);
+			fetchUrl = `${API}/api/books/${book}/chapters/${chapter}/paragraphs/${paragraph}/image/versions`;
+		}
 		fetch(fetchUrl)
 			.then((response) => response.json())
 			.then((data) => {
@@ -93,7 +90,7 @@
 		get_updated_prompt();
 
 		try {
-			const response = await fetch(`${API}/api/generate_image`, {
+			const response = await fetch(`${API}/api/image`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -144,7 +141,7 @@
 			<div class="{readingMode ? '' : 'w-full overflow-x-scroll'}  flex">
 				{#each [...Array(imageVersions)].map((_, index) => index) as version}
 					<img
-						src={`${src}${version > 0 ? `/${version}` : ''}`}
+						src={`${src}/${version}`}
 						alt="Summary of the text next to it."
 						class="m-1 block max-w-48 max-h-48"
 						on:error={() => handleImageError()}
@@ -157,7 +154,7 @@
 			<div class="overflow-x-scroll flex max-w-49">
 				{#each [...Array(imageVersions)].map((_, index) => index) as version}
 					<img
-						src={`${src}${version > 0 ? `/${version}` : ''}`}
+						src={`${src}/${version}`}
 						alt="Summary of the text next to it."
 						class="m-1 block max-w-48 max-h-48"
 						on:error={() => handleImageError()}
