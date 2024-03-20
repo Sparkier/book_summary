@@ -1,9 +1,9 @@
 """Server interface for the latent retrieval demo."""
 import json
 import asyncio
+import uuid
 from pathlib import Path
 from flask import Flask, jsonify, send_file, request
-from werkzeug.utils import secure_filename
 from ebooklib import epub
 from image_generator import generate_image_from_text
 from flask_cors import CORS
@@ -17,9 +17,6 @@ JSON_TYPE = {'ContentType': 'application/json'}
 DATA_DIR = Path('data')
 UPLOAD_FOLDER = Path('data')
 ALLOWED_EXTENSIONS = {'.epub'}
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 
 def allowed_file(filename: str):
     """Check if the file is an epub file
@@ -98,8 +95,9 @@ async def upload_book():
         return jsonify({'error': 'No selected file'}), ERROR_STATUS
 
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file_path = UPLOAD_FOLDER / filename
+        folder_path = UPLOAD_FOLDER / uuid.uuid4().__str__()
+        folder_path.mkdir(parents=True, exist_ok=True)
+        file_path = folder_path / 'book.epub'
         file.save(file_path)
 
         # Extract the title from the EPUB metadata
@@ -108,15 +106,14 @@ async def upload_book():
         title = title[0][0] if title else None
 
         if title:
-            valid_title = ''.join(c if c.isalnum() or c in {
-                                  ' ', '-', '_'} else '' for c in title)
-            folder_path = UPLOAD_FOLDER / valid_title
-            folder_path.mkdir(parents=True, exist_ok=True)
-            new_file_path = folder_path / filename
-            file_path.rename(new_file_path)
+            book_metadata = {
+                'title': title
+            }
+            with open(folder_path / 'metadata.json', 'w') as file:
+                json.dump(book_metadata, file)
             summarizer_command = [
                 "python", "book_summarizer.py",
-                "--input_file", str(folder_path / filename),
+                "--input_file", str(file_path),
                 "--output_dir", str(folder_path)
             ]
             await asyncio.create_subprocess_shell(' '.join(summarizer_command))
@@ -137,9 +134,15 @@ def get_books():
     data = []
     for path in DATA_DIR.iterdir():
         if path.is_dir():
-            data.append(path.stem)
-    books = {'books': data}
-    return jsonify(books)
+            title = ''
+            with open(path / 'metadata.json', encoding='utf8') as json_file:
+                title = json.load(json_file)["title"]
+            data.append({
+                'uuid': path.stem,
+                'title': title
+            })
+    
+    return jsonify(data)
 
 
 @app.route('/api/books/<book>')
@@ -147,15 +150,32 @@ def get_book(book):
     """Get summarized book information.
 
     Args:
-        book (string): name of the book
+        book (string): uuid of the book
 
     Returns:
         Response: summaries of the book, its chapters, and paragraphs.
     """
     path = DATA_DIR / book / "summarized.json"
     if not path.exists():
-        return jsonify({"book": []})
-    return send_file(path, mimetype='application/json')
+        return jsonify({'error': 'Book not found'}), ERROR_STATUS
+    with open(path, encoding='utf8') as json_file:
+        data = json.load(json_file)
+    return jsonify(data)
+
+
+@app.route('/api/books/<book>/metadata')
+def get_book_metadata(book):
+    """Get book metadata.
+
+    Args:
+        book (string): uuid of the book
+
+    Returns:
+        Response: book metadata.
+    """
+    with open(DATA_DIR / book / 'metadata.json', encoding='utf8') as json_file:
+        data = json.load(json_file)
+    return jsonify(data)
 
 
 @app.route('/api/books/<book>/title')
