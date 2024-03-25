@@ -16,8 +16,6 @@
 
 	let abstractionLevel = AbstractionLevel.BOOK;
 	let viewLevel = ViewLevel.IMAGE;
-	let isUploading = false;
-	let uploadError = '';
 	let style: string;
 	let isChangingCharacter = false;
 	let characterName = '';
@@ -52,39 +50,6 @@
 		isChangingCharacter = true;
 	}
 
-	async function handleFileUpload(event: Event) {
-		const target = event.target as HTMLInputElement;
-
-		if (!target?.files || target.files.length === 0) {
-			uploadError = 'Wrong file selected.';
-			return;
-		}
-
-		const file = target.files[0];
-		isUploading = true;
-		uploadError = '';
-
-		const formData = new FormData();
-		formData.append('file', file);
-
-		try {
-			const response = await fetch(`${API}/api/book`, {
-				method: 'POST',
-				body: formData
-			});
-			if (!response.ok) {
-				const data = await response.json();
-				uploadError = data.error || 'Upload failed';
-				isUploading = false;
-			} else {
-				isUploading = true;
-			}
-		} catch (error) {
-			uploadError = 'An error occurred during upload';
-			isUploading = false;
-		}
-	}
-
 	function toggleReadingMode() {
 		readingMode = !readingMode;
 	}
@@ -95,105 +60,103 @@
 
 <main class="overflow-hidden h-full">
 	<div class="flex flex-col h-full">
-		{#await fetchBooks() then books}
-			{#await fetchBook(selectedBook)}
-				Loading book.
-			{:then book}
-				<div class="py-2 flex items-start justify-between">
-					<div class="ml-4 flex flex-col">
-						<div class="flex items-center">
-							<LibraryBig size={48} class="w-12 h-12 text-white bg-blue-500 rounded-lg p-2 mr-4 " />
-							<p class="pr-2">Summarize:</p>
-							<Dropdown items={Object.values(AbstractionLevel)} bind:value={abstractionLevel} />
-							{#if readingMode}
-								<p class="pr-2 pl-2">View:</p>
-								<Dropdown items={Object.values(ViewLevel)} bind:value={viewLevel} />
-							{/if}
-							{#if !readingMode}
-								<h3 class="pr-2 pl-2">Style:</h3>
-								<select class="rounded border border-grey mt-3" bind:value={style}>
-									<option value="anime">Anime</option>
-									<option value="realistic">Realistic</option>
-									<option value="cartoon">Cartoon</option>
-									<option value="No style">No style</option>
-								</select>
-							{/if}
-							<button
-								on:click={() => toggleReadingMode()}
-								class="absolute right-1 bg-blue-600 text-white rounded-lg px-6 py-2"
-							>
-								{readingMode ? 'Edit' : 'Back'}
-							</button>
-						</div>
-						<Heading heading={book['title']} />
-					</div>
-				</div>
-
-				{#if !readingMode}
-					<div class="py-2 flex items-start ml-4">
-						{#if characters.length > 0}
-							<div class=" flex items-center">
-								<ul class="flex list-none p-0">
-									{#each characters as character, index (character.name)}
-										<li class="mr-2">
-											<button on:click={() => selectCharacter(index)} class="border-none">
-												{character.name}
-											</button>
-										</li>
-									{/each}
-								</ul>
-							</div>
+		{#await fetchBook(selectedBook)}
+			Loading book.
+		{:then book}
+			<div class="py-2 flex items-start justify-between">
+				<div class="ml-4 flex flex-col">
+					<div class="flex items-center">
+						<LibraryBig size={48} class="w-12 h-12 text-white bg-blue-500 rounded-lg p-2 mr-4 " />
+						<p class="pr-2">Summarize:</p>
+						<Dropdown items={Object.values(AbstractionLevel)} bind:value={abstractionLevel} />
+						{#if readingMode}
+							<p class="pr-2 pl-2">View:</p>
+							<Dropdown items={Object.values(ViewLevel)} bind:value={viewLevel} />
 						{/if}
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
-						<div
-							on:click={() => toggleAddCharacterMode()}
-							class="ml-2 bg-blue-500 rounded-full w-10 h-10 flex items-center justify-center"
+						{#if !readingMode}
+							<h3 class="pr-2 pl-2">Style:</h3>
+							<select class="rounded border border-grey mt-3" bind:value={style}>
+								<option value="anime">Anime</option>
+								<option value="realistic">Realistic</option>
+								<option value="cartoon">Cartoon</option>
+								<option value="No style">No style</option>
+							</select>
+						{/if}
+						<button
+							on:click={() => toggleReadingMode()}
+							class="absolute right-1 bg-blue-600 text-white rounded-lg px-6 py-2"
 						>
-							<Plus size={24} strokeWidth={1.25} />
-						</div>
+							{readingMode ? 'Edit' : 'Back'}
+						</button>
 					</div>
-					{#if addCharacterMode}
-						<div class="ml-4 flex flex-col">
-							<h3>Character Name:</h3>
-							<div class="flex items-center">
-								<input
-									class="common-input"
-									bind:value={characterName}
-									type="text"
-									placeholder="Alice"
-									style="width: 300px;"
-								/>
-							</div>
-							<h3>Character Description:</h3>
-							<textarea
-								class="common-input mt-2"
-								bind:value={characterDescription}
-								placeholder="a blond girl in a blue dress"
-								rows="3"
-								style="width: 300px;"
-							/>
-							<button class="mt-2" on:click={addCharacter} style="width: 300px;">
-								{#if isChangingCharacter}
-									Change Character
-								{:else}
-									Add Character
-								{/if}
-							</button>
+					<Heading heading={book['title']} />
+				</div>
+			</div>
+
+			{#if !readingMode}
+				<div class="py-2 flex items-start ml-4">
+					{#if characters.length > 0}
+						<div class=" flex items-center">
+							<ul class="flex list-none p-0">
+								{#each characters as character, index (character.name)}
+									<li class="mr-2">
+										<button on:click={() => selectCharacter(index)} class="border-none">
+											{character.name}
+										</button>
+									</li>
+								{/each}
+							</ul>
 						</div>
 					{/if}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<div
+						on:click={() => toggleAddCharacterMode()}
+						class="ml-2 bg-blue-500 rounded-full w-10 h-10 flex items-center justify-center"
+					>
+						<Plus size={24} strokeWidth={1.25} />
+					</div>
+				</div>
+				{#if addCharacterMode}
+					<div class="ml-4 flex flex-col">
+						<h3>Character Name:</h3>
+						<div class="flex items-center">
+							<input
+								class="common-input"
+								bind:value={characterName}
+								type="text"
+								placeholder="Alice"
+								style="width: 300px;"
+							/>
+						</div>
+						<h3>Character Description:</h3>
+						<textarea
+							class="common-input mt-2"
+							bind:value={characterDescription}
+							placeholder="a blond girl in a blue dress"
+							rows="3"
+							style="width: 300px;"
+						/>
+						<button class="mt-2" on:click={addCharacter} style="width: 300px;">
+							{#if isChangingCharacter}
+								Change Character
+							{:else}
+								Add Character
+							{/if}
+						</button>
+					</div>
 				{/if}
-				<SummaryContainer
-					{book}
-					{selectedBook}
-					{abstractionLevel}
-					{style}
-					{characters}
-					{readingMode}
-					{viewLevel}
-				/>
-			{:catch}
-				<p class="text-red-600">{'Book could not be loaded.'}</p>
-			{/await}
+			{/if}
+			<SummaryContainer
+				{book}
+				{selectedBook}
+				{abstractionLevel}
+				{style}
+				{characters}
+				{readingMode}
+				{viewLevel}
+			/>
+		{:catch}
+			<p class="text-red-600">{'Book could not be loaded.'}</p>
 		{/await}
 	</div>
 </main>
