@@ -16,5 +16,10 @@ export enum AbstractionLevel {
 	BOOK = 'book',
 	CHAPTER = 'chapter',
 	PARAGRAPH = 'paragraph',
-	FULL = 'full'
+}
+
+export enum ViewLevel {
+	IMAGE = 'image',
+	TEXT = 'text',
+	BOTH = 'both',
 }
