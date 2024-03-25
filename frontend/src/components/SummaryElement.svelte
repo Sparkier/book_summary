@@ -11,7 +11,6 @@
 	export let characters: { name: string; description: string }[];
 	export let readingMode: boolean;
 	export let viewLevel: ViewLevel;
-	console.log(viewLevel);
 </script>
 
 <div transition:fade>
