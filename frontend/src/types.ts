@@ -15,11 +15,11 @@ export interface Chapter {
 export enum AbstractionLevel {
 	BOOK = 'book',
 	CHAPTER = 'chapter',
-	PARAGRAPH = 'paragraph',
+	PARAGRAPH = 'paragraph'
 }
 
 export enum ViewLevel {
 	IMAGE = 'image',
 	TEXT = 'text',
-	BOTH = 'both',
+	BOTH = 'both'
 }
