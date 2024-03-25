@@ -1,15 +1,10 @@
-<script context="module">
-	import { PUBLIC_BACKEND_URL } from '$env/static/public';
-	const API = PUBLIC_BACKEND_URL;
-</script>
-
 <script lang="ts">
 	import '../app.css';
 	import SummaryContainer from '../components/SummaryContainer.svelte';
 	import Heading from '../elements/Heading.svelte';
 	import { LibraryBig, Plus } from 'lucide-svelte';
 	import { AbstractionLevel, ViewLevel } from '../types';
-	import { fetchBooks, fetchBook } from '../api';
+	import { fetchBook } from '../api';
 	import Dropdown from '../elements/Dropdown.svelte';
 
 	let selectedBook = 'Alices Adventures in Wonderland';
