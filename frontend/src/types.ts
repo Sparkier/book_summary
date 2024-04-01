@@ -18,8 +18,8 @@ export enum AbstractionLevel {
 	PARAGRAPH = 'paragraph'
 }
 
-export enum ViewLevel {
+export enum ViewMode {
 	IMAGE = 'image',
 	TEXT = 'text',
-	BOTH = 'both'
+	IMAGE_AND_TEXT = 'image+text'
 }

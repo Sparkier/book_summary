@@ -130,9 +130,11 @@
 		userModifiedPrompt = false;
 		get_updated_prompt();
 	}
+
 	function setSelectedImage(index: number) {
 		selectedImageIndex = index;
 	}
+
 	setInterval(updatePromptPeriodically, 500);
 	getVersionNumber(src);
 	get_updated_prompt();

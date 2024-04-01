@@ -3,12 +3,12 @@
 	import SummaryElement from './SummaryElement.svelte';
 
 	import type { Book } from '../types';
-	import { AbstractionLevel, ViewLevel } from '../types';
+	import { AbstractionLevel, ViewMode } from '../types';
 
 	export let book: Book;
 	export let selectedBook: string;
 	export let abstractionLevel: AbstractionLevel;
-	export let viewLevel: ViewLevel;
+	export let viewMode: ViewMode;
 	export let style: string;
 	export let characters: { name: string; description: string }[];
 	export let readingMode: boolean;
@@ -22,13 +22,13 @@
 			{style}
 			{characters}
 			{readingMode}
-			{viewLevel}
+			{viewMode}
 		/>
 	{:else}
 		{#each book.chapters as chapter, chapterIndex}
 			<SubHeading heading={chapter['title']} />
 			<div
-				class="flex {viewLevel == ViewLevel.IMAGE && readingMode
+				class="flex {viewMode == ViewMode.IMAGE && readingMode
 					? 'flex-wrap'
 					: 'flex-col'} overflow-auto"
 			>
@@ -39,7 +39,7 @@
 						{style}
 						{characters}
 						{readingMode}
-						{viewLevel}
+						{viewMode}
 					/>
 				{:else if abstractionLevel === AbstractionLevel.PARAGRAPH}
 					{#each chapter.paragraph_summaries as paragraphSummary, paragraphIndex}
@@ -51,7 +51,7 @@
 							{style}
 							{characters}
 							{readingMode}
-							{viewLevel}
+							{viewMode}
 						/>
 					{/each}
 				{:else}
@@ -64,7 +64,7 @@
 							{style}
 							{characters}
 							{readingMode}
-							{viewLevel}
+							{viewMode}
 						/>
 					{/each}
 				{/if}

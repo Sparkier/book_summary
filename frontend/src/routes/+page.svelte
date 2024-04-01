@@ -3,14 +3,14 @@
 	import SummaryContainer from '../components/SummaryContainer.svelte';
 	import Heading from '../elements/Heading.svelte';
 	import { LibraryBig, Plus } from 'lucide-svelte';
-	import { AbstractionLevel, ViewLevel } from '../types';
+	import { AbstractionLevel, ViewMode } from '../types';
 	import { fetchBook } from '../api';
 	import Dropdown from '../elements/Dropdown.svelte';
 
 	let selectedBook = 'Alices Adventures in Wonderland';
 
 	let abstractionLevel = AbstractionLevel.BOOK;
-	let viewLevel = ViewLevel.IMAGE;
+	let viewMode = ViewMode.IMAGE;
 	let style: string;
 	let isChangingCharacter = false;
 	let characterName = '';
@@ -66,7 +66,7 @@
 						<Dropdown items={Object.values(AbstractionLevel)} bind:value={abstractionLevel} />
 						{#if readingMode}
 							<p class="pr-2 pl-2">View:</p>
-							<Dropdown items={Object.values(ViewLevel)} bind:value={viewLevel} />
+							<Dropdown items={Object.values(ViewMode)} bind:value={viewMode} />
 						{/if}
 						{#if !readingMode}
 							<h3 class="pr-2 pl-2">Style:</h3>
@@ -81,7 +81,7 @@
 							on:click={() => toggleReadingMode()}
 							class="absolute right-1 bg-blue-600 text-white rounded-lg px-6 py-2"
 						>
-							{readingMode ? 'Edit' : 'Back'}
+							{readingMode ? 'Edit' : 'View'}
 						</button>
 					</div>
 					<Heading heading={book['title']} />
@@ -113,7 +113,7 @@
 				</div>
 				{#if addCharacterMode}
 					<div class="ml-4 flex flex-col">
-						<h3>Character Name:</h3>
+						<h3>Name:</h3>
 						<div class="flex items-center">
 							<input
 								class="common-input"
@@ -123,7 +123,7 @@
 								style="width: 300px;"
 							/>
 						</div>
-						<h3>Character Description:</h3>
+						<h3>Description:</h3>
 						<textarea
 							class="common-input mt-2"
 							bind:value={characterDescription}
@@ -148,7 +148,7 @@
 				{style}
 				{characters}
 				{readingMode}
-				{viewLevel}
+				{viewMode}
 			/>
 		{:catch}
 			<p class="text-red-600">{'Book could not be loaded.'}</p>

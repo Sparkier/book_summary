@@ -3,29 +3,29 @@
 
 	import ImageComponent from './ImageComponent.svelte';
 	import TextComponent from './TextComponent.svelte';
-	import { ViewLevel } from '../types';
+	import { ViewMode } from '../types';
 
 	export let text: string;
 	export let image: string;
 	export let style: string;
 	export let characters: { name: string; description: string }[];
 	export let readingMode: boolean;
-	export let viewLevel: ViewLevel;
+	export let viewMode: ViewMode;
 </script>
 
 <div transition:fade>
 	<div class="flex-item">
 		<div class="flex flex-row">
 			{#if readingMode}
-				{#if viewLevel == ViewLevel.IMAGE}
+				{#if viewMode == ViewMode.IMAGE}
 					<div class="ml-4 flex flex-wrap items-center m-1">
 						<ImageComponent src={image} {text} {style} {characters} {readingMode} />
 					</div>
-				{:else if viewLevel == ViewLevel.TEXT}
+				{:else if viewMode == ViewMode.TEXT}
 					<div class="w-full ml-4 flex items-center">
 						<TextComponent {text} {readingMode} />
 					</div>
-				{:else if viewLevel == ViewLevel.BOTH}
+				{:else if viewMode == ViewMode.IMAGE_AND_TEXT}
 					<div class="w-full ml-4 flex items-center">
 						<TextComponent {text} {readingMode} />
 					</div>
