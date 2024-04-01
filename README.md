@@ -50,8 +50,8 @@ To select an interpreter, press STRG + SHIFT + P and search for Python: Select I
 
 ### How to setup Frontend
 
-1. After the backend server is up and running, open a new command prompt go into the frontend folder and install npm: `npm i`
+1. After the backend server is up and running, open a new command prompt go into the frontend folder and install npm: `yarn install`
 2. To establish the backend URL for the frontend, a .env file needs to be created containing the URL of the backend server. By default, it should look like this: PUBLIC_BACKEND_URL="http://127.0.0.1:5000".
-3. After that start the frontend using `npm run dev`.
+3. After that start the frontend using `yarn dev`.
 
 Now the application should be running at `http://localhost:5173/`.
