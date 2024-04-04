@@ -52,7 +52,7 @@
 		const target = event.target as HTMLInputElement;
 
 		if (!target?.files || target.files.length === 0) {
-			uploadError = 'Wrong file selected.';
+			uploadError = 'Invalid file selected.';
 			return;
 		}
 
@@ -147,7 +147,7 @@
 
 				{#if characters.length > 0}
 					<div class="ml-4">
-						<h3>Added Characters:</h3>
+						<h3>Characters:</h3>
 						<ul>
 							{#each characters as character, index (character.name)}
 								<li>

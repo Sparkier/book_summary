@@ -4,10 +4,6 @@
 	import Heading from '../elements/Heading.svelte';
 
 	export let data;
-
-	function addBook() {
-		// books.push({ title: `Book ${books.length + 1}`, author: `Author ${books.length + 1}` });
-	}
 </script>
 
 <div>

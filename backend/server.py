@@ -95,7 +95,7 @@ async def upload_book():
         return jsonify({'error': 'No selected file'}), ERROR_STATUS
 
     if file and allowed_file(file.filename):
-        folder_path = UPLOAD_FOLDER / uuid.uuid4().__str__()
+        folder_path = UPLOAD_FOLDER / str(uuid.uuid4())
         folder_path.mkdir(parents=True, exist_ok=True)
         file_path = folder_path / 'book.epub'
         file.save(file_path)
@@ -145,17 +145,17 @@ def get_books():
     return jsonify(data)
 
 
-@app.route('/api/books/<book>')
-def get_book(book):
+@app.route('/api/books/<book_uuid>')
+def get_book(book_uuid):
     """Get summarized book information.
 
     Args:
-        book (string): uuid of the book
+        book_uuid (string): uuid of the book
 
     Returns:
         Response: summaries of the book, its chapters, and paragraphs.
     """
-    path = DATA_DIR / book / "summarized.json"
+    path = DATA_DIR / book_uuid / "summarized.json"
     if not path.exists():
         return jsonify({'error': 'Book not found'}), ERROR_STATUS
     with open(path, encoding='utf8') as json_file:
@@ -163,60 +163,60 @@ def get_book(book):
     return jsonify(data)
 
 
-@app.route('/api/books/<book>/metadata')
-def get_book_metadata(book):
+@app.route('/api/books/<book_uuid>/metadata')
+def get_book_metadata(book_uuid):
     """Get book metadata.
 
     Args:
-        book (string): uuid of the book
+        book_uuid (string): uuid of the book
 
     Returns:
         Response: book metadata.
     """
-    with open(DATA_DIR / book / 'metadata.json', encoding='utf8') as json_file:
+    with open(DATA_DIR / book_uuid / 'metadata.json', encoding='utf8') as json_file:
         data = json.load(json_file)
     return jsonify(data)
 
 
-@app.route('/api/books/<book>/title')
-def get_title(book):
+@app.route('/api/books/<book_uuid>/title')
+def get_title(book_uuid):
     """Get book title.
 
     Args:
-        book (string): name of the book
+        book_uuid (string): uuid of the book
 
     Returns:
         string: book title.
     """
-    with open(DATA_DIR / book / 'summarized.json', encoding='utf8') as json_file:
+    with open(DATA_DIR / book_uuid / 'summarized.json', encoding='utf8') as json_file:
         data = json.load(json_file)["book"]["title"]
     return jsonify(data)
 
 
-@app.route('/api/books/<book>/images/<int:version>')
-def get_book_summary_image(book, version):
+@app.route('/api/books/<book_uuid>/images/<int:version>')
+def get_book_summary_image(book_uuid, version):
     """Get image representation of the summarized book.
 
     Args:
-        book (string): name of the book
+        book_uuid (string): name of the book
         version (int): version number (default: None).
 
     Returns:
         Response: book image representation.
     """
 
-    filename = DATA_DIR / book / \
+    filename = DATA_DIR / book_uuid / \
         f"book_summary-version-{version}.png"
 
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/books/<book>/chapters/<int:chapter>/images/<int:version>')
-def get_chapter_summary_image(book, chapter: int, version):
+@app.route('/api/books/<book_uuid>/chapters/<int:chapter>/images/<int:version>')
+def get_chapter_summary_image(book_uuid, chapter: int, version):
     """Get image representation of the summarized chapter.
 
     Args:
-        book (string): name of the book
+        book_uuid (string): name of the book
         chapter (int): chapter index.
         version (int): version number (default: None).
 
@@ -224,19 +224,19 @@ def get_chapter_summary_image(book, chapter: int, version):
         Response: chapter image representation.
     """
 
-    filename = DATA_DIR / book / \
+    filename = DATA_DIR / book_uuid / \
         f"chapter-{chapter:03d}_chapter_summary-version-{version}.png"
 
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/books/<book>/chapters/<int:chapter>/'
+@app.route('/api/books/<book_uuid>/chapters/<int:chapter>/'
            'summarized_paragraphs/<int:paragraph>/images/<int:version>')
-def get_paragraph_summary_image(book, chapter: int, paragraph: int, version):
+def get_paragraph_summary_image(book_uuid, chapter: int, paragraph: int, version):
     """Get image representation of the summarized paragraph.
 
     Args:
-        book (string): name of the book
+        book_uuid (string): name of the book
         chapter (int): chapter index.
         paragraph (int): the paragraph index within the chapter.
         version (int): version number (default: None).
@@ -245,19 +245,19 @@ def get_paragraph_summary_image(book, chapter: int, paragraph: int, version):
         Response: paragraph image representation.
     """
 
-    filename = DATA_DIR / book / \
+    filename = DATA_DIR / book_uuid / \
         f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}-version-{version}.png"
 
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/books/<book>/chapters/<int:chapter>/'
+@app.route('/api/books/<book_uuid>/chapters/<int:chapter>/'
            'paragraphs/<int:paragraph>/images/<int:version>')
-def get_paragraph_image(book, chapter: int, paragraph: int, version):
+def get_paragraph_image(book_uuid, chapter: int, paragraph: int, version):
     """Get image representation of the full paragraph.
 
     Args:
-        book (string): name of the book
+        book_uuid (string): name of the book
         chapter (int): chapter index.
         paragraph (int): the paragraph index within the chapter.
         version (int): version number (default: None).
@@ -266,55 +266,55 @@ def get_paragraph_image(book, chapter: int, paragraph: int, version):
         Response: paragraph image representation.
     """
 
-    filename = DATA_DIR / book / \
+    filename = DATA_DIR / book_uuid / \
         f"chapter-{chapter:03d}_paragraph-{paragraph:04d}-version-{version}.png"
 
     return send_file(filename, mimetype='image/png')
 
 
-@app.route('/api/books/<book>/image/versions')
-def get_num_book_summary_images(book):
+@app.route('/api/books/<book_uuid>/image/versions')
+def get_num_book_summary_images(book_uuid):
     """Get the number of versions for a book summary image.
 
     Args:
-        book (string): name of the book
+         book_uuid (string): name of the book
 
     Returns:
         Response: JSON with the number of versions.
     """
     counter = 0
-    base_filename = DATA_DIR / book / "book_summary.png"
+    base_filename = DATA_DIR / book_uuid / "book_summary.png"
     while (base_filename.with_name(f"{base_filename.stem}-version-{counter}.png")).exists():
         counter += 1
     return jsonify({'versions': counter})
 
 
-@app.route('/api/books/<book>/chapters/<int:chapter>/image/versions')
-def get_num_chapter_summary_images(book, chapter):
+@app.route('/api/books/<book_uuid>/chapters/<int:chapter>/image/versions')
+def get_num_chapter_summary_images(book_uuid, chapter):
     """Get the number of versions for a chapter summary image.
 
     Args:
-        book (string): name of the book
+        book_uuid (string): name of the book
         chapter (int): chapter index.
 
     Returns:
         Response: JSON with the number of versions.
     """
     counter = 0
-    base_filename = DATA_DIR / book / \
+    base_filename = DATA_DIR / book_uuid / \
         f"chapter-{chapter:03d}_chapter_summary.png"
     while (base_filename.with_name(f"{base_filename.stem}-version-{counter}.png")).exists():
         counter += 1
     return jsonify({'versions': counter})
 
 
-@app.route('/api/books/<book>/chapters/<int:chapter>'
+@app.route('/api/books/<book_uuid>/chapters/<int:chapter>'
            '/summarized_paragraphs/<int:paragraph>/image/versions')
-def get_num_paragraph_summary_images(book, chapter, paragraph):
+def get_num_paragraph_summary_images(book_uuid, chapter, paragraph):
     """Get the number of versions for a paragraph summary image.
 
     Args:
-        book (string): name of the book
+        book_uuid (string): name of the book
         chapter (int): chapter index.
         paragraph (int): paragraph index within the chapter.
 
@@ -322,19 +322,19 @@ def get_num_paragraph_summary_images(book, chapter, paragraph):
         Response: JSON with the number of versions.
     """
     counter = 0
-    base_filename = DATA_DIR / book / \
+    base_filename = DATA_DIR / book_uuid / \
         f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}.png"
     while (base_filename.with_name(f"{base_filename.stem}-version-{counter}.png")).exists():
         counter += 1
     return jsonify({'versions': counter})
 
 
-@app.route('/api/books/<book>/chapters/<int:chapter>/paragraphs/<int:paragraph>/image/versions')
-def get_num_paragraph_images(book, chapter, paragraph):
+@app.route('/api/books/<book_uuid>/chapters/<int:chapter>/paragraphs/<int:paragraph>/image/versions')
+def get_num_paragraph_images(book_uuid, chapter, paragraph):
     """Get the number of versions for a paragraph image.
 
     Args:
-        book (string): name of the book
+        book_uuid (string): name of the book
         chapter (int): chapter index.
         paragraph (int): paragraph index within the chapter.
 
@@ -342,7 +342,7 @@ def get_num_paragraph_images(book, chapter, paragraph):
         Response: JSON with the number of versions.
     """
     counter = 0
-    base_filename = DATA_DIR / book / \
+    base_filename = DATA_DIR / book_uuid / \
         f"chapter-{chapter:03d}_paragraph-{paragraph:04d}.png"
     while (base_filename.with_name(f"{base_filename.stem}-version-{counter}.png")).exists():
         counter += 1
