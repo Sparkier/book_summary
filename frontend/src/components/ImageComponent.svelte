@@ -136,7 +136,6 @@
 	}
 
 	function setSelectedImage(index: number) {
-		selectedImageIndex = index;
 		saveSelectedImage(index);
 	}
 

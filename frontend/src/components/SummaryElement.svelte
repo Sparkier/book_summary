@@ -6,6 +6,7 @@
 	import { ViewMode } from '../types';
 	import type { SelectedImages } from '../types';
 
+
 	export let text: string;
 	export let image: string;
 	export let style: string;
@@ -15,7 +16,6 @@
 	export let selectedImages: SelectedImages;
 	export let chapterIndex: number;
 	export let paragraphIndex: number;
-</script>
 
 <div transition:fade>
 	<div class="flex-item">
