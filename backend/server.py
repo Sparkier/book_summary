@@ -173,6 +173,85 @@ def get_title(book):
     return jsonify(data)
 
 
+@app.route('/api/books/<book_uuid>/images/selected')
+def get_selected_images(book_uuid):
+    """Get selected images of a book.
+
+    Args:
+        book_uuid (string): UUID of the book
+
+    Returns:
+        Response: selected image ids of the book, its chapters, and paragraphs.
+    """
+    path = DATA_DIR / book_uuid / "selected_images.json"
+
+    if not path.exists():
+        generate_selected_images(book_uuid)
+    return send_file(path, mimetype='application/json')
+
+
+def generate_selected_images(book_uuid):
+    """Generate selected images JSON data for a book and save it to a file.
+
+    Args:
+        book_uuid (string): UUID of the book.
+
+    Returns:
+        dict: Selected image data for the book.
+    """
+    json_file_path = DATA_DIR / book_uuid / 'summarized.json'
+
+    with open(json_file_path, encoding='utf8') as json_file:
+        data = json.load(json_file)
+        chapters = data["book"]["chapters"]
+
+        new_json_data = {
+            "bookImageIndex": 0,
+            "chapters": []
+        }
+
+        for chapter in chapters:
+            paragraph_count = len(chapter["paragraphs"])
+            new_chapter = {
+                "imageIndex": 0,
+                "paragraphs": [0] * paragraph_count
+            }
+            new_json_data["chapters"].append(new_chapter)
+
+    save_path = DATA_DIR / book_uuid / "selected_images.json"
+    with open(save_path, 'w', encoding='utf-8') as json_output_file:
+        json.dump(new_json_data, json_output_file,
+                  ensure_ascii=False, indent=4)
+
+    return new_json_data
+
+
+@app.route('/api/books/<book_uuid>/images/selected/update', methods=['POST'])
+def update_selected_images(book_uuid):
+    """Update selected images of a book.
+
+    Args:
+        book_uuid (string): UUID of the book
+
+    Returns:
+        Response: Message indicating success or failure of the update.
+    """
+    try:
+        updated_selected_images = request.json
+        json_file_path = DATA_DIR / book_uuid / 'selected_images.json'
+
+        if not json_file_path.exists():
+            return jsonify({"message": "Selected images file does not exist."}), 404
+
+        with open(json_file_path, 'w', encoding='utf-8') as json_file:
+            json.dump(updated_selected_images, json_file,
+                      ensure_ascii=False, indent=4)
+
+        return jsonify({"message": "Selected images updated successfully."}), 200
+    except (FileNotFoundError, ValueError) as e:
+        return jsonify({"message": f"Error updating selected images: {str(e)}"}), 500
+
+
 @app.route('/api/books/<book>/images/<int:version>')
 def get_book_summary_image(book, version):
     """Get image representation of the summarized book.

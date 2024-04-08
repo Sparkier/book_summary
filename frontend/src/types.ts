@@ -4,6 +4,14 @@ export interface Book {
 	book_summary: string;
 }
 
+export interface SelectedImages {
+    bookImageIndex: number;
+    chapters: {
+        imageIndex: number;
+        paragraphs: number[];
+    }[];
+}
+
 export interface Chapter {
 	num: number;
 	title: string;

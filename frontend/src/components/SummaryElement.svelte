@@ -4,6 +4,7 @@
 	import ImageComponent from './ImageComponent.svelte';
 	import TextComponent from './TextComponent.svelte';
 	import { ViewMode } from '../types';
+	import type { SelectedImages } from '../types';
 
 	export let text: string;
 	export let image: string;
@@ -11,6 +12,9 @@
 	export let characters: { name: string; description: string }[];
 	export let readingMode: boolean;
 	export let viewMode: ViewMode;
+	export let selectedImages: SelectedImages;
+	export let chapterIndex: number;
+	export let paragraphIndex: number;
 </script>
 
 <div transition:fade>
@@ -19,7 +23,16 @@
 			{#if readingMode}
 				{#if viewMode == ViewMode.IMAGE}
 					<div class="ml-4 flex flex-wrap items-center m-1">
-						<ImageComponent src={image} {text} {style} {characters} {readingMode} />
+						<ImageComponent
+							src={image}
+							{text}
+							{style}
+							{characters}
+							{readingMode}
+							{selectedImages}
+							{chapterIndex}
+							{paragraphIndex}
+						/>
 					</div>
 				{:else if viewMode == ViewMode.TEXT}
 					<div class="w-full ml-4 flex items-center">
@@ -30,12 +43,30 @@
 						<TextComponent {text} {readingMode} />
 					</div>
 					<div class="ml-4 flex items-center m-1">
-						<ImageComponent src={image} {text} {style} {characters} {readingMode} />
+						<ImageComponent
+							src={image}
+							{text}
+							{style}
+							{characters}
+							{readingMode}
+							{selectedImages}
+							{chapterIndex}
+							{paragraphIndex}
+						/>
 					</div>
 				{/if}
 			{:else}
 				<div class="w-full ml-4 flex items-center">
-					<ImageComponent src={image} {text} {style} {characters} {readingMode} />
+					<ImageComponent
+						src={image}
+						{text}
+						{style}
+						{characters}
+						{readingMode}
+						{selectedImages}
+						{chapterIndex}
+						{paragraphIndex}
+					/>
 				</div>
 			{/if}
 		</div>

@@ -4,11 +4,15 @@
 </script>
 
 <script lang="ts">
+	import type { SelectedImages } from '../types';
 	export let src: string;
 	export let text: string;
 	export let style: string;
 	export let characters: { name: string; description: string }[];
 	export let readingMode: boolean;
+	export let selectedImages: SelectedImages;
+	export let chapterIndex: number;
+	export let paragraphIndex: number;
 
 	let isGenerating = false;
 	let errorMessage = '';
@@ -133,8 +137,52 @@
 
 	function setSelectedImage(index: number) {
 		selectedImageIndex = index;
+		saveSelectedImage(index);
 	}
 
+	function getSelectedImageIndex() {
+		if (chapterIndex != -1) {
+			if (paragraphIndex != -1) {
+				selectedImageIndex = selectedImages.chapters[chapterIndex].paragraphs[paragraphIndex];
+			} else {
+				selectedImageIndex = selectedImages.chapters[chapterIndex].imageIndex;
+			}
+		} else {
+			selectedImageIndex = selectedImages.bookImageIndex;
+		}
+	}
+
+	async function saveSelectedImage(index: number) {
+		selectedImageIndex = index;
+		const parts = src.split('/');
+		const book = parts[3];
+		if (chapterIndex != -1) {
+			if (paragraphIndex != -1) {
+				selectedImages.chapters[chapterIndex].paragraphs[paragraphIndex] = selectedImageIndex;
+			} else {
+				selectedImages.chapters[chapterIndex].imageIndex = selectedImageIndex;
+			}
+		} else {
+			selectedImages.bookImageIndex = selectedImageIndex;
+		}
+		try {
+			const response = await fetch(`/api/books/${book}/images/selected/update`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(selectedImages)
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to save selected image data');
+			}
+		} catch (error) {
+			(errorMessage = 'Error saving selected image data:'), error;
+		}
+	}
+
+	getSelectedImageIndex();
 	setInterval(updatePromptPeriodically, 500);
 	getVersionNumber(src);
 	get_updated_prompt();
@@ -181,7 +229,7 @@
 						{/if}
 					</div>
 					<div class="ml-auto">
-						<button on:click={() => generateImage()}>
+						<button disabled={isGenerating} on:click={() => generateImage()}>
 							{isGenerating ? 'Generating...' : 'Generate image'}
 						</button>
 						{#if errorMessage}
@@ -192,7 +240,7 @@
 			</div>
 		</div>
 	{:else}
-		<button on:click={() => generateImage()} class="m-1">
+		<button disabled={isGenerating} on:click={() => generateImage()} class="m-1">
 			{isGenerating ? 'Generating...' : 'Generate image'}
 		</button>
 		{#if errorMessage}

@@ -2,7 +2,7 @@
 	import '../app.css';
 	import SummaryContainer from '../components/SummaryContainer.svelte';
 	import Heading from '../elements/Heading.svelte';
-	import { LibraryBig, Plus } from 'lucide-svelte';
+	import { LibraryBig, Plus, Trash2 } from 'lucide-svelte';
 	import { AbstractionLevel, ViewMode } from '../types';
 	import { fetchBook } from '../api';
 	import Dropdown from '../elements/Dropdown.svelte';
@@ -15,23 +15,31 @@
 	let isChangingCharacter = false;
 	let characterName = '';
 	let characterDescription = '';
-	let characters: { name: string; description: string }[] = [];
+	let characterId = NaN;
+	let characters: { name: string; description: string; id: number }[] = [];
+	let characterIdCounter = 0;
 	let readingMode = true;
 	let addCharacterMode = false;
 
 	function addCharacter() {
-		const index = characters.findIndex((char) => char.name === characterName);
+		const index = characters.findIndex((char) => char.id === characterId);
 
 		if (index !== -1) {
 			// Change character description if character exists
+			characters[index].name = characterName;
 			characters[index].description = characterDescription;
 		} else {
 			// Add new character
-			characters = [...characters, { name: characterName, description: characterDescription }];
+			characters = [
+				...characters,
+				{ name: characterName, description: characterDescription, id: characterIdCounter }
+			];
+			characterIdCounter++;
 		}
 		// Clear input fields after adding/updating the character
 		characterName = '';
 		characterDescription = '';
+		characterId = NaN;
 		isChangingCharacter = false;
 		addCharacterMode = false;
 	}
@@ -40,14 +48,20 @@
 		// Select a character for modification
 		addCharacterMode = true;
 		const selectedCharacter = characters[index];
+		characterId = selectedCharacter.id;
 		characterName = selectedCharacter.name;
 		characterDescription = selectedCharacter.description;
 		isChangingCharacter = true;
 	}
 
+	function deleteCharacter(id: number) {
+		characters = characters.filter((char) => char.id !== id);
+	}
+
 	function toggleReadingMode() {
 		readingMode = !readingMode;
 	}
+
 	function toggleAddCharacterMode() {
 		addCharacterMode = !addCharacterMode;
 	}
@@ -93,11 +107,20 @@
 					{#if characters.length > 0}
 						<div class=" flex items-center">
 							<ul class="flex list-none p-0">
-								{#each characters as character, index (character.name)}
+								{#each characters as character, index (character.id)}
 									<li class="mr-2">
-										<button on:click={() => selectCharacter(index)} class="border-none">
-											{character.name}
-										</button>
+										<div class="flex items-center rounded-xl border-none bg-slate-100">
+											<button on:click={() => selectCharacter(index)} class="border-none mt-1">
+												{character.name}
+											</button>
+											<!-- svelte-ignore a11y-click-events-have-key-events -->
+											<div
+												on:click={() => deleteCharacter(character.id)}
+												class="rounded-full w-4 h-4 flex items-center justify-center mr-2"
+											>
+												<Trash2 />
+											</div>
+										</div>
 									</li>
 								{/each}
 							</ul>
@@ -106,7 +129,7 @@
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
 					<div
 						on:click={() => toggleAddCharacterMode()}
-						class="ml-2 bg-blue-500 rounded-full w-10 h-10 flex items-center justify-center"
+						class="ml-2 mt-1 bg-blue-500 rounded-full w-10 h-10 flex items-center justify-center"
 					>
 						<Plus size={24} strokeWidth={1.25} />
 					</div>
