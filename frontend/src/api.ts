@@ -13,7 +13,7 @@ export async function fetchBook(book: string): Promise<Book> {
 }
 
 export async function fetchSelectedImages(book: string): Promise<SelectedImages> {
-    const response = await fetch(`/api/books/${book}/images/selected`);
-    const jsonResponse = await response.json();
-    return jsonResponse as SelectedImages;
+	const response = await fetch(`/api/books/${book}/images/selected`);
+	const jsonResponse = await response.json();
+	return jsonResponse as SelectedImages;
 }

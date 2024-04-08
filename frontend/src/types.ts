@@ -5,11 +5,11 @@ export interface Book {
 }
 
 export interface SelectedImages {
-    bookImageIndex: number;
-    chapters: {
-        imageIndex: number;
-        paragraphs: number[];
-    }[];
+	bookImageIndex: number;
+	chapters: {
+		imageIndex: number;
+		paragraphs: number[];
+	}[];
 }
 
 export interface Chapter {
