@@ -206,15 +206,15 @@ def generate_selected_images(book_uuid):
         chapters = data["book"]["chapters"]
 
         new_json_data = {
-            "bookImageIndex": 0,
+            "bookSelectedId": 0,
             "chapters": []
         }
 
         for chapter in chapters:
             paragraph_count = len(chapter["paragraphs"])
             new_chapter = {
-                "imageIndex": 0,
-                "paragraphs": [0] * paragraph_count
+                "chapterSelectedId": 0,
+                "paragraphSelectedIds": [0] * paragraph_count
             }
             new_json_data["chapters"].append(new_chapter)
 

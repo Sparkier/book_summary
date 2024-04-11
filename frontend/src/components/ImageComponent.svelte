@@ -141,12 +141,13 @@
 	function getSelectedImageIndex() {
 		if (chapterIndex != -1) {
 			if (paragraphIndex != -1) {
-				selectedImageIndex = selectedImages.chapters[chapterIndex].paragraphs[paragraphIndex];
+				selectedImageIndex =
+					selectedImages.chapters[chapterIndex].paragraphSelectedIds[paragraphIndex];
 			} else {
-				selectedImageIndex = selectedImages.chapters[chapterIndex].imageIndex;
+				selectedImageIndex = selectedImages.chapters[chapterIndex].chapterSelectedId;
 			}
 		} else {
-			selectedImageIndex = selectedImages.bookImageIndex;
+			selectedImageIndex = selectedImages.bookSelectedId;
 		}
 	}
 
@@ -154,12 +155,13 @@
 		selectedImageIndex = index;
 		if (chapterIndex != -1) {
 			if (paragraphIndex != -1) {
-				selectedImages.chapters[chapterIndex].paragraphs[paragraphIndex] = selectedImageIndex;
+				selectedImages.chapters[chapterIndex].paragraphSelectedIds[paragraphIndex] =
+					selectedImageIndex;
 			} else {
-				selectedImages.chapters[chapterIndex].imageIndex = selectedImageIndex;
+				selectedImages.chapters[chapterIndex].chapterSelectedId = selectedImageIndex;
 			}
 		} else {
-			selectedImages.bookImageIndex = selectedImageIndex;
+			selectedImages.bookSelectedId = selectedImageIndex;
 		}
 		try {
 			const response = await fetch(`/api/books/${selectedBook}/images/selected/update`, {
