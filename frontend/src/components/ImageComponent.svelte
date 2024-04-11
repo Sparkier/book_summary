@@ -18,7 +18,7 @@
 	let imageVersions = 0;
 	let prompt: string;
 	let userModifiedPrompt = false;
-	let selectedImageIndex: number;
+	let selectedImageIndex = getSelectedImageIndex();
 
 	function getVersionNumber(src: string) {
 		const parts = src.split('/');
@@ -133,21 +133,15 @@
 		get_updated_prompt();
 	}
 
-	function setSelectedImage(index: number) {
-		selectedImageIndex = index;
-		saveSelectedImage(index);
-	}
-
 	function getSelectedImageIndex() {
 		if (chapterIndex != -1) {
 			if (paragraphIndex != -1) {
-				selectedImageIndex =
-					selectedImages.chapters[chapterIndex].paragraphSelectedIds[paragraphIndex];
+				return selectedImages.chapters[chapterIndex].paragraphSelectedIds[paragraphIndex];
 			} else {
-				selectedImageIndex = selectedImages.chapters[chapterIndex].chapterSelectedId;
+				return selectedImages.chapters[chapterIndex].chapterSelectedId;
 			}
 		} else {
-			selectedImageIndex = selectedImages.bookSelectedId;
+			return selectedImages.bookSelectedId;
 		}
 	}
 
@@ -155,13 +149,12 @@
 		selectedImageIndex = index;
 		if (chapterIndex != -1) {
 			if (paragraphIndex != -1) {
-				selectedImages.chapters[chapterIndex].paragraphSelectedIds[paragraphIndex] =
-					selectedImageIndex;
+				selectedImages.chapters[chapterIndex].paragraphSelectedIds[paragraphIndex] = index;
 			} else {
-				selectedImages.chapters[chapterIndex].chapterSelectedId = selectedImageIndex;
+				selectedImages.chapters[chapterIndex].chapterSelectedId = index;
 			}
 		} else {
-			selectedImages.bookSelectedId = selectedImageIndex;
+			selectedImages.bookSelectedId = index;
 		}
 		try {
 			const response = await fetch(`/api/books/${selectedBook}/images/selected/update`, {
@@ -180,7 +173,6 @@
 		}
 	}
 
-	getSelectedImageIndex();
 	setInterval(updatePromptPeriodically, 500);
 	getVersionNumber(src);
 	get_updated_prompt();
@@ -190,7 +182,7 @@
 	{#if readingMode}
 		<div class=" w-64 h-64 flex flex-wrap">
 			<img
-				src={`${src}/${selectedImageIndex}`}
+				src={`${src}/${getSelectedImageIndex()}`}
 				alt="Summary of the text next to it."
 				class="block w-64 h-64"
 				on:error={() => handleImageError()}
@@ -214,7 +206,7 @@
 							alt="Summary of the text next to it."
 							class="m-1 block max-w-24 max-h-24 cursor-pointer"
 							on:error={() => handleImageError()}
-							on:click={() => setSelectedImage(version)}
+							on:click={() => saveSelectedImage(version)}
 						/>
 					{/each}
 				</div>

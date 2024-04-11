@@ -72,6 +72,7 @@
 			});
 
 			if (response.ok) {
+				// Clear input fields after adding/updating the character
 				characterName = '';
 				characterDescription = '';
 				characterId = NaN;
