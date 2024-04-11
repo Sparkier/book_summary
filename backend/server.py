@@ -252,6 +252,52 @@ def update_selected_images(book_uuid):
         return jsonify({"message": f"Error updating selected images: {str(e)}"}), 500
 
 
+@app.route('/api/books/<book_uuid>/characters', methods=['POST'])
+def save_characters(book_uuid):
+    """Save characters of a book.
+
+    Args:
+        book_uuid (string): UUID of the book
+
+    Returns:
+        Response: Message indicating success or failure of the update.
+    """
+    try:
+        characters_data = request.json
+        json_file_path = DATA_DIR / book_uuid / 'characters.json'
+
+        with open(json_file_path, 'w', encoding='utf-8') as json_file:
+            json.dump(characters_data, json_file, ensure_ascii=False, indent=4)
+
+        return jsonify({"message": "Characters updated successfully."}), 200
+    except (FileNotFoundError, ValueError) as e:
+        return jsonify({"message": f"Error updating characters: {str(e)}"}), 500
+
+
+@app.route('/api/books/<book_uuid>/characters')
+def get_characters(book_uuid):
+    """Get characters of a book.
+
+    Args:
+        book_uuid (string): UUID of the book
+
+    Returns:
+        Response: JSON with characters or an empty list if the file does not exist.
+    """
+    try:
+        json_file_path = DATA_DIR / book_uuid / 'characters.json'
+
+        if not json_file_path.exists():
+            return jsonify([])
+
+        with open(json_file_path, 'r', encoding='utf-8') as json_file:
+            characters_data = json.load(json_file)
+
+        return jsonify(characters_data)
+    except (FileNotFoundError, ValueError) as e:
+        return jsonify({"error": f"Error loading characters: {str(e)}"}), 500
+
+
 @app.route('/api/books/<book>/images/<int:version>')
 def get_book_summary_image(book, version):
     """Get image representation of the summarized book.

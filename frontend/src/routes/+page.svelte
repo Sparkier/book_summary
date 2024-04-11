@@ -6,6 +6,8 @@
 	import { AbstractionLevel, ViewMode } from '../types';
 	import { fetchBook } from '../api';
 	import Dropdown from '../elements/Dropdown.svelte';
+	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	const API = PUBLIC_BACKEND_URL;
 
 	let selectedBook = 'Alices Adventures in Wonderland';
 
@@ -20,8 +22,9 @@
 	let characterIdCounter = 0;
 	let readingMode = true;
 	let addCharacterMode = false;
+	let errorMessage = '';
 
-	function addCharacter() {
+	async function addCharacter() {
 		const index = characters.findIndex((char) => char.id === characterId);
 
 		if (index !== -1) {
@@ -36,12 +39,50 @@
 			];
 			characterIdCounter++;
 		}
-		// Clear input fields after adding/updating the character
-		characterName = '';
-		characterDescription = '';
-		characterId = NaN;
-		isChangingCharacter = false;
-		addCharacterMode = false;
+		saveCharacters();
+	}
+
+	async function loadCharacters() {
+		try {
+			const response = await fetch(`${API}/api/books/${selectedBook}/characters`);
+			const data = await response.json();
+			characters = data;
+			// Get a correct ID counter again
+			let maxId = 0;
+			characters.forEach((character) => {
+				if (character.id > maxId) {
+					maxId = character.id;
+				}
+			});
+
+			characterIdCounter = maxId + 1;
+		} catch (error) {
+			errorMessage = 'Error loading characters:' + error;
+		}
+	}
+
+	async function saveCharacters() {
+		try {
+			const response = await fetch(`${API}/api/books/${selectedBook}/characters`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(characters)
+			});
+
+			if (response.ok) {
+				characterName = '';
+				characterDescription = '';
+				characterId = NaN;
+				isChangingCharacter = false;
+				addCharacterMode = false;
+			} else {
+				errorMessage = 'Error saving characters:' + response.statusText;
+			}
+		} catch (error) {
+			errorMessage = 'Error saving characters:';
+		}
 	}
 
 	function selectCharacter(index: number) {
@@ -56,10 +97,12 @@
 
 	function deleteCharacter(id: number) {
 		characters = characters.filter((char) => char.id !== id);
+		saveCharacters();
 	}
 
 	function toggleReadingMode() {
 		readingMode = !readingMode;
+		loadCharacters();
 	}
 
 	function toggleAddCharacterMode() {
@@ -133,6 +176,9 @@
 					>
 						<Plus size={24} strokeWidth={1.25} />
 					</div>
+					{#if errorMessage}
+						<p class="text-red-600">{errorMessage}</p>
+					{/if}
 				</div>
 				{#if addCharacterMode}
 					<div class="ml-4 flex flex-col">
