@@ -103,12 +103,13 @@
 
 	function toggleReadingMode() {
 		readingMode = !readingMode;
-		loadCharacters();
 	}
 
 	function toggleAddCharacterMode() {
 		addCharacterMode = !addCharacterMode;
 	}
+
+	loadCharacters();
 </script>
 
 <main class="overflow-hidden h-full">
