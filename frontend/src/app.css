@@ -70,15 +70,3 @@ button:not(:disabled):active {
 button:focus {
 	border-color: #666;
 }
-
-.book-card {
-	border: 1px solid #ccc;
-	padding: 10px;
-	margin-bottom: 10px;
-}
-
-.book-list {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-	gap: 20px;
-}
