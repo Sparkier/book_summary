@@ -17,7 +17,7 @@
 
 <div class="flex flex-col overflow-auto h-">
 	{#await fetchSelectedImages(selectedBook)}
-		Loading SelectedImages.
+		Loading selection...
 	{:then selectedImages}
 		{#if abstractionLevel === AbstractionLevel.BOOK}
 			<SummaryElement
@@ -30,6 +30,7 @@
 				{selectedImages}
 				chapterIndex={-1}
 				paragraphIndex={-1}
+				{selectedBook}
 			/>
 		{:else}
 			{#each book.chapters as chapter, chapterIndex}
@@ -50,6 +51,7 @@
 							{selectedImages}
 							{chapterIndex}
 							paragraphIndex={-1}
+							{selectedBook}
 						/>
 					{:else if abstractionLevel === AbstractionLevel.PARAGRAPH}
 						{#each chapter.paragraph_summaries as paragraphSummary, paragraphIndex}
@@ -65,6 +67,7 @@
 								{selectedImages}
 								{chapterIndex}
 								{paragraphIndex}
+								{selectedBook}
 							/>
 						{/each}
 					{:else}
@@ -81,6 +84,7 @@
 								{selectedImages}
 								{chapterIndex}
 								{paragraphIndex}
+								{selectedBook}
 							/>
 						{/each}
 					{/if}

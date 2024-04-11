@@ -241,7 +241,7 @@ def update_selected_images(book_uuid):
         json_file_path = DATA_DIR / book_uuid / 'selected_images.json'
 
         if not json_file_path.exists():
-            return jsonify({"message": "Selected images file does not exist."}), 404
+            generate_selected_images(book_uuid)
 
         with open(json_file_path, 'w', encoding='utf-8') as json_file:
             json.dump(updated_selected_images, json_file,

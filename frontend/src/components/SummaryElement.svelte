@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-
 	import ImageComponent from './ImageComponent.svelte';
 	import TextComponent from './TextComponent.svelte';
 	import { ViewMode } from '../types';
@@ -15,6 +14,7 @@
 	export let selectedImages: SelectedImages;
 	export let chapterIndex: number;
 	export let paragraphIndex: number;
+	export let selectedBook: string;
 </script>
 
 <div transition:fade>
@@ -32,6 +32,7 @@
 							{selectedImages}
 							{chapterIndex}
 							{paragraphIndex}
+							{selectedBook}
 						/>
 					</div>
 				{:else if viewMode == ViewMode.TEXT}
@@ -52,6 +53,7 @@
 							{selectedImages}
 							{chapterIndex}
 							{paragraphIndex}
+							{selectedBook}
 						/>
 					</div>
 				{/if}
@@ -66,6 +68,7 @@
 						{selectedImages}
 						{chapterIndex}
 						{paragraphIndex}
+						{selectedBook}
 					/>
 				</div>
 			{/if}

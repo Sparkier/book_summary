@@ -1,10 +1,8 @@
-<script context="module">
-	import { PUBLIC_BACKEND_URL } from '$env/static/public';
-	const API = PUBLIC_BACKEND_URL;
-</script>
-
 <script lang="ts">
 	import type { SelectedImages } from '../types';
+	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	const API = PUBLIC_BACKEND_URL;
+
 	export let src: string;
 	export let text: string;
 	export let style: string;
@@ -13,36 +11,36 @@
 	export let selectedImages: SelectedImages;
 	export let chapterIndex: number;
 	export let paragraphIndex: number;
+	export let selectedBook: string;
 
 	let isGenerating = false;
 	let errorMessage = '';
 	let imageVersions = 0;
 	let prompt: string;
 	let userModifiedPrompt = false;
-	let selectedImageIndex = 0;
+	let selectedImageIndex: number;
 
 	function getVersionNumber(src: string) {
 		const parts = src.split('/');
-		const book = parts[3];
 
 		let fetchUrl = '';
 
 		if (src.includes('/images')) {
-			fetchUrl = `${API}/api/books/${book}/image/versions`;
+			fetchUrl = `${API}/api/books/${selectedBook}/image/versions`;
 		}
 		if (src.includes('/chapters')) {
 			const chapter = parseInt(parts[5]);
-			fetchUrl = `${API}/api/books/${book}/chapters/${chapter}/image/versions`;
+			fetchUrl = `${API}/api/books/${selectedBook}/chapters/${chapter}/image/versions`;
 		}
 		if (src.includes('/summarized_paragraphs')) {
 			const chapter = parseInt(parts[5]);
 			const paragraph = parseInt(parts[7]);
-			fetchUrl = `${API}/api/books/${book}/chapters/${chapter}/summarized_paragraphs/${paragraph}/image/versions`;
+			fetchUrl = `${API}/api/books/${selectedBook}/chapters/${chapter}/summarized_paragraphs/${paragraph}/image/versions`;
 		}
 		if (src.includes('/paragraphs')) {
 			const chapter = parseInt(parts[5]);
 			const paragraph = parseInt(parts[7]);
-			fetchUrl = `${API}/api/books/${book}/chapters/${chapter}/paragraphs/${paragraph}/image/versions`;
+			fetchUrl = `${API}/api/books/${selectedBook}/chapters/${chapter}/paragraphs/${paragraph}/image/versions`;
 		}
 		fetch(fetchUrl)
 			.then((response) => response.json())
@@ -154,8 +152,6 @@
 
 	async function saveSelectedImage(index: number) {
 		selectedImageIndex = index;
-		const parts = src.split('/');
-		const book = parts[3];
 		if (chapterIndex != -1) {
 			if (paragraphIndex != -1) {
 				selectedImages.chapters[chapterIndex].paragraphs[paragraphIndex] = selectedImageIndex;
@@ -166,7 +162,7 @@
 			selectedImages.bookImageIndex = selectedImageIndex;
 		}
 		try {
-			const response = await fetch(`/api/books/${book}/images/selected/update`, {
+			const response = await fetch(`/api/books/${selectedBook}/images/selected/update`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
