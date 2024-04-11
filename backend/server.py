@@ -294,7 +294,7 @@ def get_characters(book_uuid):
             characters_data = json.load(json_file)
 
         return jsonify(characters_data)
-    except (FileNotFoundError, ValueError) as e:
+    except ValueError as e:
         return jsonify({"error": f"Error loading characters: {str(e)}"}), 500
 
 
