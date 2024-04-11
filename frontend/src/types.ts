@@ -15,6 +15,11 @@ export interface Chapter {
 export enum AbstractionLevel {
 	BOOK = 'book',
 	CHAPTER = 'chapter',
-	PARAGRAPH = 'paragraph',
-	FULL = 'full'
+	PARAGRAPH = 'paragraph'
+}
+
+export enum ViewMode {
+	IMAGE = 'image',
+	TEXT = 'text',
+	IMAGE_AND_TEXT = 'image+text'
 }
