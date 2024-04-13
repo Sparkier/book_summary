@@ -145,7 +145,7 @@
 		}
 	}
 
-	async function saveSelectedImage(index: number) {
+	async function setSelectedImage(index: number) {
 		selectedImageIndex = index;
 		if (chapterIndex != -1) {
 			if (paragraphIndex != -1) {
@@ -206,7 +206,7 @@
 							alt="Summary of the text next to it."
 							class="m-1 block max-w-24 max-h-24 cursor-pointer"
 							on:error={() => handleImageError()}
-							on:click={() => saveSelectedImage(version)}
+							on:click={() => setSelectedImage(version)}
 						/>
 					{/each}
 				</div>
