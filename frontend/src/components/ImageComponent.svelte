@@ -18,7 +18,7 @@
 	let imageVersions = 0;
 	let prompt: string;
 	let userModifiedPrompt = false;
-	let selectedImageIndex = getSelectedImageIndex();
+	$: selectedImageIndex = getSelectedImageIndex(selectedImages);
 
 	function getVersionNumber(src: string) {
 		const parts = src.split('/');
@@ -133,7 +133,7 @@
 		get_updated_prompt();
 	}
 
-	function getSelectedImageIndex() {
+	function getSelectedImageIndex(selectedImages: SelectedImages) {
 		if (chapterIndex != -1) {
 			if (paragraphIndex != -1) {
 				return selectedImages.chapters[chapterIndex].paragraphSelectedIds[paragraphIndex];
@@ -146,7 +146,6 @@
 	}
 
 	async function setSelectedImage(index: number) {
-		selectedImageIndex = index;
 		if (chapterIndex != -1) {
 			if (paragraphIndex != -1) {
 				selectedImages.chapters[chapterIndex].paragraphSelectedIds[paragraphIndex] = index;
@@ -182,7 +181,7 @@
 	{#if readingMode}
 		<div class=" w-64 h-64 flex flex-wrap">
 			<img
-				src={`${src}/${getSelectedImageIndex()}`}
+				src={`${src}/${selectedImageIndex}`}
 				alt="Summary of the text next to it."
 				class="block w-64 h-64"
 				on:error={() => handleImageError()}
