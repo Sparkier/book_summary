@@ -28,7 +28,6 @@ module.exports = {
 		}
 	],
 	rules: {
-		'no-console': 'error',
-		"@typescript-eslint/no-inferrable-types": "off",
+		'no-console': 'error'
 	}
 };
