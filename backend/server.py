@@ -72,17 +72,17 @@ async def generate_image():
         if filename is None:
             return jsonify({"error": "Unknown route type"}), ERROR_STATUS
 
-        counter = 1
+        counter = 0
         text = data.get("prompt")
         basefilename = filename
+        filename = basefilename.with_stem(f"{basefilename.stem}{counter}")
         while filename.exists():
             # If the file exists, generate a new filename with an incrementing counter
             filename = basefilename.with_stem(f"{basefilename.stem}{counter}")
             counter += 1
         output_path = str(filename)
-        await asyncio.create_subprocess_exec(
-            generate_image_from_text(text, output_path)
-        )
+        generate_image_from_text(text, output_path)
+
         return jsonify({"message": "Image successfully generated"}), OK_STATUS
 
     except (FileNotFoundError, ValueError) as e:
