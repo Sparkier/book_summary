@@ -8,6 +8,7 @@
 	let fileInput: HTMLInputElement;
 	let isUploading = false;
 	let uploadError = '';
+	let fileName = '';
 
 	async function handleFileUpload(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -18,6 +19,7 @@
 		}
 
 		const file = target.files[0];
+		fileName = file.name;
 		isUploading = true;
 		uploadError = '';
 
@@ -46,33 +48,48 @@
 <div class="mx-auto">
 	<div class="flex flex-wrap justify-start gap-4 m-3">
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<div on:click={() => fileInput.click()}>
-			{#if !isUploading}
+		{#if !isUploading}
+			<div on:click={() => fileInput.click()}>
 				<a href="http://localhost:5173/#">
-					<BookCard title="Add book" imageSrc="EmptyImage.jpg" creator="" />
+					<BookCard
+						title="Titel"
+						imageSrc="EmptyImage.jpg"
+						creator="Author"
+						buttonMsg="Add book"
+						btnDisabled={false}
+					/>
 				</a>
-			{:else}
-				<a href="http://localhost:5173/#">
-					<BookCard title="Uploading..." imageSrc="EmptyImage.jpg" creator="" />
-				</a>
-			{/if}
-			<input
-				type="file"
-				accept=".epub"
-				style="display: none"
-				bind:this={fileInput}
-				on:change={handleFileUpload}
-			/>
-			{#if uploadError}
-				<p class="text-red-600">{uploadError}</p>
-			{/if}
-		</div>
+			</div>
+		{:else}
+			<a class="disabled cursor-not-allowed" href="http://localhost:5173/#">
+				<BookCard
+					title={fileName}
+					imageSrc="EmptyImage.jpg"
+					creator=""
+					buttonMsg="Uploading..."
+					btnDisabled={true}
+				/>
+			</a>
+		{/if}
+		<input
+			type="file"
+			accept=".epub"
+			style="display: none"
+			bind:this={fileInput}
+			on:change={handleFileUpload}
+		/>
+		{#if uploadError}
+			<p class="text-red-600">{uploadError}</p>
+		{/if}
+
 		{#each books as book (book.uuid)}
 			<a href="/book/{book.uuid}">
 				<BookCard
 					title={book.title}
 					imageSrc={`/api/books/${book.uuid}/images/0`}
 					creator={book.creator}
+					buttonMsg={'Edit'}
+					btnDisabled={false}
 				/>
 			</a>
 		{/each}
