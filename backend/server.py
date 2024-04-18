@@ -78,8 +78,8 @@ async def generate_image():
         filename = basefilename.with_stem(f"{basefilename.stem}{counter}")
         while filename.exists():
             # If the file exists, generate a new filename with an incrementing counter
-            filename = basefilename.with_stem(f"{basefilename.stem}{counter}")
             counter += 1
+            filename = basefilename.with_stem(f"{basefilename.stem}{counter}")
         output_path = str(filename)
         generate_image_from_text(text, output_path)
 
