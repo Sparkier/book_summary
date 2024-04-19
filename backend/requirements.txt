@@ -1,3 +1,4 @@
+--index-url https://download.pytorch.org/whl/cu121; sys_platform == 'windows' # CUDA 12.1
 flask
 torch
 transformers
@@ -10,3 +11,5 @@ Pillow
 Flask-Cors
 diffusers
 flask[async]
+accelerate # Optional, but recommended by diffusers
+# flash-attn # Optional, takes forever to compile, but can improve performance
