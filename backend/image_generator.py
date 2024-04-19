@@ -21,7 +21,6 @@ def generate_image_from_text(text, output_path):
     images = pipeline(prompt).images
     generated_image = images[0]
     save_image(generated_image, output_path)
-    return output_path
 
 
 def save_image(image, output_path):
