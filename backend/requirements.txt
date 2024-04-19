@@ -1,4 +1,4 @@
---index-url https://download.pytorch.org/whl/cu121; sys_platform == 'windows' # CUDA 12.1
+--extra-index-url https://download.pytorch.org/whl/cu121; sys_platform == 'windows' # CUDA 12.1
 flask
 torch
 transformers
