@@ -14,14 +14,19 @@ def create_text_to_image_pipeline(model="lykon/dreamshaper-8"):
     """
     if torch.cuda.is_available():
         print("Using CUDA pipeline")
-        # bfloat16 to speed-up 2-3x
+        # bfloat16/float16 to speed-up 2-10x compared to float32
+        dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
         pipe = AutoPipelineForText2Image.from_pretrained(
-            model, torch_dtype=torch.bfloat16, use_safetensors=True
+            model, torch_dtype=dtype, use_safetensors=True
         )
         pipe = pipe.to("cuda")
 
-        # Tried performance optimizations, but they do not seem to help/work and they
-        # are therefore commented out
+        # Tried performance optimizations tested on NVidia A100:
+        # https://github.com/huggingface/diffusion-fast
+        # They do not seem to help/work on NVidia 2080 so they 
+        # are therefore commented out.
+        # 
+        # See also
         # https://huggingface.co/docs/diffusers/v0.27.2/en/tutorials/fast_diffusion
         # pylint: disable=protected-access
         # torch._inductor.config.conv_1x1_as_mm = True
