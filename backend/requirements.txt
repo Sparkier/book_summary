@@ -1,5 +1,6 @@
 --extra-index-url https://download.pytorch.org/whl/cu121; sys_platform == 'windows' # CUDA 12.1
 flask
+python-dotenv # To read .env file
 torch
 transformers
 ebooklib
@@ -9,6 +10,7 @@ keras-cv
 matplotlib
 Pillow
 Flask-Cors
+huggingface_hub # To use HuggingFace InferenceClient
 diffusers
 flask[async]
 accelerate # Optional, but recommended by diffusers

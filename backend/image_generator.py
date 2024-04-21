@@ -2,9 +2,10 @@
 
 import torch
 from diffusers import AutoPipelineForText2Image, DEISMultistepScheduler
+from PIL import Image
 
 
-def create_text_to_image_pipeline(model="lykon/dreamshaper-8"):
+def create_text_to_image_pipeline(model: str = "lykon/dreamshaper-8"):
     """Create pipeline for generating images from text and optimize it for performance.
     Args:
         model (str): Pretrained Huggingface text-to-image model.
@@ -23,9 +24,9 @@ def create_text_to_image_pipeline(model="lykon/dreamshaper-8"):
 
         # Tried performance optimizations tested on NVidia A100:
         # https://github.com/huggingface/diffusion-fast
-        # They do not seem to help/work on NVidia 2080 so they 
+        # They do not seem to help/work on NVidia 2080 so they
         # are therefore commented out.
-        # 
+        #
         # See also
         # https://huggingface.co/docs/diffusers/v0.27.2/en/tutorials/fast_diffusion
         # pylint: disable=protected-access
@@ -61,15 +62,15 @@ def create_text_to_image_pipeline(model="lykon/dreamshaper-8"):
     return pipe
 
 
-def generate_image_from_text(pipeline: AutoPipelineForText2Image, prompt):
+def generate_image_from_text(pipeline: AutoPipelineForText2Image, prompt: str) -> Image:
     """Generate an image with the supplied pipeline.
 
     Args:
+        pipeline (AutoPipelineForText2Image): The pipeline to use for image generation.
         prompt (str): The text used for image generation.
-        output_path (str): The file path where the image should be saved.
 
     Returns:
-        str: The file path where the image is saved.
+        `Image`: The generated image.
     """
     images = pipeline([prompt]).images
     return images[0]
