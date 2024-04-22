@@ -122,7 +122,7 @@
 			<div class="py-2 flex items-start justify-between">
 				<div class="ml-4 flex flex-col">
 					<div class="flex items-center">
-						<a href="http://localhost:5173/">
+						<a href="/">
 							<LibraryBig size={48} class="w-12 h-12 text-white bg-blue-500 rounded-lg p-2 mr-4 " />
 						</a>
 						<p class="pr-2">Summarize:</p>

@@ -49,26 +49,22 @@
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	{#if !isUploading}
 		<div on:click={() => fileInput.click()}>
-			<a href="http://localhost:5173/#">
-				<BookCard
-					title="Titel"
-					imageSrc="EmptyImage.jpg"
-					creator="Author"
-					buttonMsg="Add book"
-					btnDisabled={false}
-				/>
-			</a>
+			<BookCard
+				title="Title"
+				imageSrc="EmptyImage.jpg"
+				creator="Author"
+				buttonMsg="Add book"
+				btnDisabled={false}
+			/>
 		</div>
 	{:else}
-		<a class="disabled cursor-not-allowed" href="http://localhost:5173/#">
-			<BookCard
-				title={fileName}
-				imageSrc="EmptyImage.jpg"
-				creator=""
-				buttonMsg="Uploading..."
-				btnDisabled={true}
-			/>
-		</a>
+		<BookCard
+			title={fileName}
+			imageSrc="EmptyImage.jpg"
+			creator=""
+			buttonMsg="Uploading..."
+			btnDisabled={true}
+		/>
 	{/if}
 	<input
 		type="file"
