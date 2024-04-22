@@ -1,12 +1,11 @@
 <script lang="ts">
+	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	import { LibraryBig, Plus, Trash2 } from 'lucide-svelte';
+	import { fetchBook } from '../../../api';
 	import '../../../app.css';
 	import SummaryContainer from '../../../components/SummaryContainer.svelte';
-	import Heading from '../../../elements/Heading.svelte';
-	import { LibraryBig, Plus, Trash2 } from 'lucide-svelte';
-	import { AbstractionLevel, ViewMode } from '../../../types';
-	import { fetchBook } from '../../../api';
 	import Dropdown from '../../../elements/Dropdown.svelte';
-	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	import { AbstractionLevel, ViewMode } from '../../../types';
 	const API = PUBLIC_BACKEND_URL;
 
 	const url = window.location.pathname;
@@ -148,7 +147,7 @@
 							{readingMode ? 'Edit' : 'View'}
 						</button>
 					</div>
-					<Heading heading={book['title']} />
+					<h2>{book['title']}</h2>
 				</div>
 			</div>
 

@@ -1,10 +1,9 @@
 <script lang="ts">
-	import SubHeading from '../elements/SubHeading.svelte';
 	import SummaryElement from './SummaryElement.svelte';
 
+	import { fetchSelectedImages } from '../api';
 	import type { Book } from '../types';
 	import { AbstractionLevel, ViewMode } from '../types';
-	import { fetchSelectedImages } from '../api';
 
 	export let book: Book;
 	export let selectedBook: string;
@@ -34,7 +33,7 @@
 			/>
 		{:else}
 			{#each book.chapters as chapter, chapterIndex}
-				<SubHeading heading={chapter['title']} />
+				<h3>{chapter['title']}</h3>
 				<div
 					class="flex {viewMode == ViewMode.IMAGE && readingMode
 						? 'flex-wrap'

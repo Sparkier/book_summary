@@ -1,6 +1,6 @@
 <script lang="ts">
-	import BookCard from '../elements/BookCard.svelte';
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	import BookCard from '../elements/BookCard.svelte';
 	const API = PUBLIC_BACKEND_URL;
 
 	export let books: { uuid: string; title: string; creator: string }[];
@@ -45,53 +45,51 @@
 	}
 </script>
 
-<div class="mx-auto">
-	<div class="flex flex-wrap justify-start gap-4 m-3">
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		{#if !isUploading}
-			<div on:click={() => fileInput.click()}>
-				<a href="http://localhost:5173/#">
-					<BookCard
-						title="Titel"
-						imageSrc="EmptyImage.jpg"
-						creator="Author"
-						buttonMsg="Add book"
-						btnDisabled={false}
-					/>
-				</a>
-			</div>
-		{:else}
-			<a class="disabled cursor-not-allowed" href="http://localhost:5173/#">
+<div class="flex flex-wrap justify-start gap-4">
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	{#if !isUploading}
+		<div on:click={() => fileInput.click()}>
+			<a href="http://localhost:5173/#">
 				<BookCard
-					title={fileName}
+					title="Titel"
 					imageSrc="EmptyImage.jpg"
-					creator=""
-					buttonMsg="Uploading..."
-					btnDisabled={true}
-				/>
-			</a>
-		{/if}
-		<input
-			type="file"
-			accept=".epub"
-			style="display: none"
-			bind:this={fileInput}
-			on:change={handleFileUpload}
-		/>
-		{#if uploadError}
-			<p class="text-red-600">{uploadError}</p>
-		{/if}
-
-		{#each books as book (book.uuid)}
-			<a href="/book/{book.uuid}">
-				<BookCard
-					title={book.title}
-					imageSrc={`/api/books/${book.uuid}/images/0`}
-					creator={book.creator}
-					buttonMsg={'Edit'}
+					creator="Author"
+					buttonMsg="Add book"
 					btnDisabled={false}
 				/>
 			</a>
-		{/each}
-	</div>
+		</div>
+	{:else}
+		<a class="disabled cursor-not-allowed" href="http://localhost:5173/#">
+			<BookCard
+				title={fileName}
+				imageSrc="EmptyImage.jpg"
+				creator=""
+				buttonMsg="Uploading..."
+				btnDisabled={true}
+			/>
+		</a>
+	{/if}
+	<input
+		type="file"
+		accept=".epub"
+		style="display: none"
+		bind:this={fileInput}
+		on:change={handleFileUpload}
+	/>
+	{#if uploadError}
+		<p class="text-red-600">{uploadError}</p>
+	{/if}
+
+	{#each books as book (book.uuid)}
+		<a href="/book/{book.uuid}">
+			<BookCard
+				title={book.title}
+				imageSrc={`/api/books/${book.uuid}/images/0`}
+				creator={book.creator}
+				buttonMsg={'Edit'}
+				btnDisabled={false}
+			/>
+		</a>
+	{/each}
 </div>
