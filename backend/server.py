@@ -6,10 +6,12 @@ import uuid
 from pathlib import Path
 from flask import Flask, jsonify, send_file, request
 from ebooklib import epub
-from image_generator import generate_image_from_text
+from local_inference_client import LocalInferenceClient
+from huggingface_hub import InferenceClient
 from flask_cors import CORS
 
 app = Flask(__name__)
+app.config.from_pyfile('.flaskenv')
 CORS(app)
 OK_STATUS = 200
 ERROR_STATUS = 400
@@ -19,6 +21,14 @@ DATA_DIR = Path("data")
 UPLOAD_FOLDER = Path("data")
 ALLOWED_EXTENSIONS = {".epub"}
 
+# Create text to image pipeline asynchronously as it can take some time to create
+# and we do not want to do it each image generation call.
+# Use ThreadPoolExecutor for creating the object because asyncio is difficult to use
+# as flask runs its own event loop.
+if "HUGGINGFACE_TOKEN" in app.config:
+    inference_client = InferenceClient(token=app.config["HUGGINGFACE_TOKEN"])
+else:
+    inference_client = LocalInferenceClient()
 
 def allowed_file(filename: str):
     """Check if the file is an epub file
@@ -81,8 +91,9 @@ async def generate_image():
             counter += 1
             filename = basefilename.with_stem(f"{basefilename.stem}{counter}")
         output_path = str(filename)
-        generate_image_from_text(text, output_path)
 
+        image = inference_client.text_to_image(text, model="lykon/dreamshaper-8")
+        image.save(output_path)
         return jsonify({"message": "Image successfully generated"}), OK_STATUS
 
     except (FileNotFoundError, ValueError) as e:
