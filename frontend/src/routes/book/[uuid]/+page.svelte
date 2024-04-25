@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	import { fetchBook } from '$lib/api';
+	import SummaryContainer from '$lib/components/SummaryContainer.svelte';
+	import Dropdown from '$lib/elements/Dropdown.svelte';
+	import { AbstractionLevel, ViewMode } from '$lib/types';
 	import { LibraryBig, Plus, Trash2 } from 'lucide-svelte';
-	import { fetchBook } from '../../../api';
-	import '../../../app.css';
-	import SummaryContainer from '../../../components/SummaryContainer.svelte';
-	import Dropdown from '../../../elements/Dropdown.svelte';
-	import { AbstractionLevel, ViewMode } from '../../../types';
+
 	const API = PUBLIC_BACKEND_URL;
 
 	const url = window.location.pathname;

@@ -1,7 +1,6 @@
 <script lang="ts">
-	import '../app.css';
-	import AddBook from '../components/AddBook.svelte';
-	import BookListComponent from '../components/BookListComponent.svelte';
+	import AddBook from '$lib/components/AddBook.svelte';
+	import BookListComponent from '$lib/components/BookListComponent.svelte';
 
 	export let data;
 </script>
