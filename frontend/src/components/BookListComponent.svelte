@@ -50,10 +50,11 @@
 	{#if !isUploading}
 		<div on:click={() => fileInput.click()}>
 			<BookCard
-				title="Title"
+				title="New Book"
 				imageSrc="EmptyImage.jpg"
-				creator="Author"
-				buttonMsg="Add book"
+				creator=""
+				button={true}
+				buttonMsg="Add"
 				btnDisabled={false}
 			/>
 		</div>
@@ -62,6 +63,7 @@
 			title={fileName}
 			imageSrc="EmptyImage.jpg"
 			creator=""
+			button={true}
 			buttonMsg="Uploading..."
 			btnDisabled={true}
 		/>
@@ -83,8 +85,6 @@
 				title={book.title}
 				imageSrc={`/api/books/${book.uuid}/images/0`}
 				creator={book.creator}
-				buttonMsg={'Edit'}
-				btnDisabled={false}
 			/>
 		</a>
 	{/each}
