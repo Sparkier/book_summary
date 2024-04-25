@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { SelectedImages } from '../types';
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	import Button from '../elements/Button.svelte';
 	const API = PUBLIC_BACKEND_URL;
 
 	export let src: string;
@@ -69,10 +70,10 @@
 		const characterText =
 			charactersInText.length > 0
 				? charactersInText.length === 1
-					? `The character is ${charactersInText[0].name}, ${charactersInText[0].description}.`
+					? `The character is ${charactersInText[0].name}, ${charactersInText[0].description}. `
 					: `The characters are ${charactersInText
 							.map((char) => `${char.name}, ${char.description}`)
-							.join(' and ')}.`
+							.join(' and ')}. `
 				: '';
 
 		let styleText = '';
@@ -81,7 +82,7 @@
 			styleText = `Generate an image in ${style} style.`;
 		}
 
-		const fullText = `${styleText} ${characterText} The scene is: ${text}`;
+		const fullText = `${styleText} ${characterText}The scene is: ${text}`;
 		prompt = fullText;
 		return fullText;
 	}
@@ -177,7 +178,7 @@
 	get_updated_prompt();
 </script>
 
-<div class="w-full">
+<div class="w-full mr-4">
 	{#if readingMode}
 		<div class=" w-64 h-64 flex flex-wrap">
 			<img
@@ -210,17 +211,19 @@
 					{/each}
 				</div>
 				<h3>Prompt:</h3>
-				<textarea on:input={handleTextareaInput} rows="3" class="mt-2 w-full">{prompt}</textarea>
-				<div class="flex">
+				<textarea on:input={handleTextareaInput} rows="3" class="mt-2 w-full border"
+					>{prompt}</textarea
+				>
+				<div class="flex pt-2">
 					<div>
 						{#if userModifiedPrompt}
-							<button on:click={resetUserModifiedPrompt}> Reset prompt </button>
+							<Button on:click={resetUserModifiedPrompt}>Reset prompt</Button>
 						{/if}
 					</div>
 					<div class="ml-auto">
-						<button disabled={isGenerating} on:click={() => generateImage()}>
+						<Button disabled={isGenerating} on:click={() => generateImage()}>
 							{isGenerating ? 'Generating...' : 'Generate image'}
-						</button>
+						</Button>
 						{#if errorMessage}
 							<p class="text-red-600">{errorMessage}</p>
 						{/if}
@@ -229,9 +232,9 @@
 			</div>
 		</div>
 	{:else}
-		<button disabled={isGenerating} on:click={() => generateImage()} class="m-1">
+		<Button disabled={isGenerating} on:click={() => generateImage()}>
 			{isGenerating ? 'Generating...' : 'Generate image'}
-		</button>
+		</Button>
 		{#if errorMessage}
 			<p class="text-red-600">{errorMessage}</p>
 		{/if}

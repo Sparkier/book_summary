@@ -6,6 +6,7 @@
 	import SummaryContainer from '../../../components/SummaryContainer.svelte';
 	import Dropdown from '../../../elements/Dropdown.svelte';
 	import { AbstractionLevel, ViewMode } from '../../../types';
+	import Button from '../../../elements/Button.svelte';
 	const API = PUBLIC_BACKEND_URL;
 
 	const url = window.location.pathname;
@@ -111,6 +112,12 @@
 		addCharacterMode = !addCharacterMode;
 	}
 
+	function handleKeyDown(event: { which: number }) {
+		if (event.which == 13) {
+			addCharacter();
+		}
+	}
+
 	loadCharacters();
 </script>
 
@@ -125,29 +132,29 @@
 						<a href="/">
 							<LibraryBig size={48} class="w-12 h-12 text-white bg-blue-500 rounded-lg p-2 mr-4 " />
 						</a>
-						<p class="pr-2">Summarize:</p>
+						<p class="pr-2 pl-2">Summarize:</p>
 						<Dropdown items={Object.values(AbstractionLevel)} bind:value={abstractionLevel} />
 						{#if readingMode}
 							<p class="pr-2 pl-2">View:</p>
 							<Dropdown items={Object.values(ViewMode)} bind:value={viewMode} />
 						{/if}
 						{#if !readingMode}
-							<h3 class="pr-2 pl-2">Style:</h3>
-							<select class="rounded border border-grey mt-3" bind:value={style}>
+							<p class="pr-2 pl-2">Style:</p>
+							<select class="rounded border border-grey" bind:value={style}>
 								<option value="anime">Anime</option>
 								<option value="realistic">Realistic</option>
 								<option value="cartoon">Cartoon</option>
 								<option value="No style">No style</option>
 							</select>
 						{/if}
-						<button
+						<Button
 							on:click={() => toggleReadingMode()}
-							class="absolute right-1 bg-blue-600 text-white rounded-lg px-6 py-2"
+							classNames="absolute right-1 bg-blue-600 text-white rounded-lg px-6 py-2 mr-2"
 						>
 							{readingMode ? 'Edit' : 'View'}
-						</button>
+						</Button>
 					</div>
-					<h2>{book['title']}</h2>
+					<h2 class="text-2xl font-bold leading-7 pr-2 mt-2">{book['title']}</h2>
 				</div>
 			</div>
 
@@ -158,14 +165,14 @@
 							<ul class="flex list-none p-0">
 								{#each characters as character, index (character.id)}
 									<li class="mr-2">
-										<div class="flex items-center rounded-xl border-none bg-slate-100">
-											<button on:click={() => selectCharacter(index)} class="border-none mt-1">
+										<div class="flex items-center rounded-xl border-none bg-slate-100 p-2">
+											<button on:click={() => selectCharacter(index)} class="border-none mr-1">
 												{character.name}
 											</button>
 											<!-- svelte-ignore a11y-click-events-have-key-events -->
 											<div
 												on:click={() => deleteCharacter(character.id)}
-												class="rounded-full w-4 h-4 flex items-center justify-center mr-2"
+												class="rounded-full w-4 h-4 flex items-center justify-center"
 											>
 												<Trash2 />
 											</div>
@@ -187,26 +194,27 @@
 					{/if}
 				</div>
 				{#if addCharacterMode}
-					<div class="ml-4 flex flex-col">
-						<h3>Name:</h3>
+					<div class="ml-4 flex flex-col mb-2">
+						<h4>Name:</h4>
 						<div class="flex items-center">
 							<input
-								class="common-input"
+								class="common-input border mt-1"
 								bind:value={characterName}
 								type="text"
 								placeholder="Alice"
 								style="width: 300px;"
 							/>
 						</div>
-						<h3>Description:</h3>
+						<h4>Description:</h4>
 						<textarea
-							class="common-input mt-2"
+							class="common-input mt-1 border"
 							bind:value={characterDescription}
 							placeholder="a blond girl in a blue dress"
 							rows="3"
 							style="width: 300px;"
+							on:keydown={handleKeyDown}
 						/>
-						<button class="mt-2" on:click={addCharacter} style="width: 300px;">
+						<button class="mt-2 border" on:click={addCharacter} style="width: 300px;">
 							{#if isChangingCharacter}
 								Change Character
 							{:else}
