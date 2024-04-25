@@ -2,6 +2,7 @@
 	export let title: string;
 	export let creator: string;
 	export let imageSrc: string;
+	export let button: boolean;
 	export let buttonMsg: string;
 	export let btnDisabled: boolean;
 </script>
@@ -15,11 +16,13 @@
 		{#if creator}
 			<p class="mb-4 text-sm font-medium text-center text-gray-600">{creator}</p>
 		{/if}
-		<button
-			class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 border border-gray-900 rounded-3xl shadow-self-center"
-			disabled={btnDisabled}
-		>
-			{buttonMsg}
-		</button>
+		{#if button}
+			<button
+				class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 border border-gray-900 rounded-3xl shadow-self-center"
+				disabled={btnDisabled}
+			>
+				{buttonMsg}
+			</button>
+		{/if}
 	</div>
 </div>
