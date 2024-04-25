@@ -85,6 +85,9 @@
 				title={book.title}
 				imageSrc={`/api/books/${book.uuid}/images/0`}
 				creator={book.creator}
+				button={false}
+				buttonMsg=""
+				btnDisabled={true}
 			/>
 		</a>
 	{/each}

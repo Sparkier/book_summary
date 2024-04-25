@@ -2,9 +2,9 @@
 	export let title: string;
 	export let creator: string;
 	export let imageSrc: string;
-	export let button: boolean = false;
-	export let buttonMsg: string = '';
-	export let btnDisabled: boolean = false;
+	export let button: boolean;
+	export let buttonMsg: string;
+	export let btnDisabled: boolean;
 </script>
 
 <div class="flex flex-col border border-slate-200 w-64 h-full rounded-lg shadow-md">
