@@ -1,7 +1,6 @@
 <script lang="ts">
-	import type { SelectedImages } from '../types';
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
-	const API = PUBLIC_BACKEND_URL;
+	import type { SelectedImages } from '$lib/types';
 
 	export let src: string;
 	export let text: string;
@@ -13,6 +12,7 @@
 	export let paragraphIndex: number;
 	export let selectedBook: string;
 
+	const API = PUBLIC_BACKEND_URL;
 	let isGenerating = false;
 	let errorMessage = '';
 	let imageVersions = 0;

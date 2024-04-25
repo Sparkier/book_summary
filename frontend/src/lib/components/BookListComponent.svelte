@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
-	import BookCard from '../elements/BookCard.svelte';
-	const API = PUBLIC_BACKEND_URL;
+	import BookCard from '$lib/elements/BookCard.svelte';
 
 	export let books: { uuid: string; title: string; creator: string }[];
 
+	const API = PUBLIC_BACKEND_URL;
 	let fileInput: HTMLInputElement;
 	let isUploading = false;
 	let uploadError = '';
