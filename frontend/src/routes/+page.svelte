@@ -1,6 +1,5 @@
 <script lang="ts">
-	import '../app.css';
-	import BookListComponent from '../components/BookListComponent.svelte';
+	import BookListComponent from '$lib/components/BookListComponent.svelte';
 
 	export let data;
 </script>
