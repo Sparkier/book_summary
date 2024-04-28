@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AddBook from '$lib/components/AddBook.svelte';
 	import BookListComponent from '$lib/components/BookListComponent.svelte';
 
 	export let data;
@@ -17,6 +18,9 @@
 </div>
 
 <div class="p-5 flex flex-col gap-3">
-	<h2>Library</h2>
+	<div class="flex gap-3 items-center">
+		<h2>Library</h2>
+		<AddBook />
+	</div>
 	<BookListComponent books={data.books} />
 </div>
