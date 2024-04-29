@@ -3,6 +3,7 @@
 	import { fetchBook } from '$lib/api';
 	import SummaryContainer from '$lib/components/SummaryContainer.svelte';
 	import Dropdown from '$lib/elements/Dropdown.svelte';
+	import Button from '$lib/elements/Button.svelte';
 	import { AbstractionLevel, ViewMode } from '$lib/types';
 	import { LibraryBig, Plus, Trash2 } from 'lucide-svelte';
 	const API = PUBLIC_BACKEND_URL;
@@ -192,7 +193,7 @@
 					{/if}
 				</div>
 				{#if addCharacterMode}
-					<div class="ml-4 flex flex-col mb-2">
+					<div class="ml-4 flex flex-col mb-2" style="width: 300px;">
 						<h4>Name:</h4>
 						<div class="flex items-center">
 							<input
@@ -200,7 +201,6 @@
 								bind:value={characterName}
 								type="text"
 								placeholder="Alice"
-								style="width: 300px;"
 							/>
 						</div>
 						<h4>Description:</h4>
@@ -209,16 +209,15 @@
 							bind:value={characterDescription}
 							placeholder="a blond girl in a blue dress"
 							rows="3"
-							style="width: 300px;"
 							on:keydown={handleKeyDown}
 						/>
-						<button class="mt-2 border" on:click={addCharacter} style="width: 300px;">
+						<Button on:click={addCharacter} classNames="mt-2">
 							{#if isChangingCharacter}
 								Change Character
 							{:else}
 								Add Character
 							{/if}
-						</button>
+						</Button>
 					</div>
 				{/if}
 			{/if}
