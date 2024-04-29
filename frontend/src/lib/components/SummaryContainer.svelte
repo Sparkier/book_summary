@@ -1,9 +1,8 @@
 <script lang="ts">
+	import { fetchSelectedImages } from '$lib/api';
+	import type { Book } from '$lib/types';
+	import { AbstractionLevel, ViewMode } from '$lib/types';
 	import SummaryElement from './SummaryElement.svelte';
-
-	import { fetchSelectedImages } from '../api';
-	import type { Book } from '../types';
-	import { AbstractionLevel, ViewMode } from '../types';
 
 	export let book: Book;
 	export let selectedBook: string;

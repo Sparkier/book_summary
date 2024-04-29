@@ -1,9 +1,9 @@
 <script lang="ts">
+	import type { SelectedImages } from '$lib/types';
+	import { ViewMode } from '$lib/types';
 	import { fade } from 'svelte/transition';
 	import ImageComponent from './ImageComponent.svelte';
 	import TextComponent from './TextComponent.svelte';
-	import { ViewMode } from '../types';
-	import type { SelectedImages } from '../types';
 
 	export let text: string;
 	export let image: string;
