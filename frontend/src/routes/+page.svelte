@@ -18,6 +18,6 @@
 </div>
 
 <div class="p-5 flex flex-col gap-3">
-	<h2 class="text-2xl font-bold leading-7 pr-2 mt-2">Library</h2>
+	<h2>Library</h2>
 	<BookListComponent books={data.books} />
 </div>

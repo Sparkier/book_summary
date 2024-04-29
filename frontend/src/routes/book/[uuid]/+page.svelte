@@ -154,7 +154,7 @@
 							{readingMode ? 'Edit' : 'View'}
 						</Button>
 					</div>
-					<h2 class="text-2xl font-bold leading-7 pr-2 mt-2">{book['title']}</h2>
+					<h2>{book['title']}</h2>
 				</div>
 			</div>
 
