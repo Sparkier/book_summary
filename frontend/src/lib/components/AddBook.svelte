@@ -6,6 +6,7 @@
 	let fileInput: HTMLInputElement;
 	let isUploading = false;
 	let uploadError = '';
+	let progressError = '';
 	let fileName = '';
 	let progress = 0;
 
@@ -60,7 +61,7 @@
 				isUploading = false;
 			}
 		} catch (error) {
-			console.error('Error fetching progress:', error);
+			progressError = 'Error fetching progress:';
 		}
 	}
 	initial();
@@ -81,6 +82,9 @@
 				style="width: {Math.floor(progress)}%"
 			>
 				{Math.floor(progress)}%
+				{#if progressError}
+					<p class="text-red-600">{progressError}</p>
+				{/if}
 			</div>
 		</div>
 	{/if}
