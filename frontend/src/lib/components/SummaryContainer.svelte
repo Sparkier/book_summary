@@ -32,7 +32,7 @@
 			/>
 		{:else}
 			{#each book.chapters as chapter, chapterIndex}
-				<h3>{chapter['title']}</h3>
+				<h2 class="pr-2 pb-2 mt-2 ml-4">{chapter['title']}</h2>
 				<div
 					class="flex {viewMode == ViewMode.IMAGE && readingMode
 						? 'flex-wrap'
