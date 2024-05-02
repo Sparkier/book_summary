@@ -7,6 +7,7 @@
 	let isUploading = false;
 	let uploadError = '';
 	let fileName = '';
+	let progress = 0;
 
 	async function handleFileUpload(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -18,9 +19,8 @@
 
 		const file = target.files[0];
 		fileName = file.name;
-		isUploading = true;
 		uploadError = '';
-
+		pollProgress();
 		const formData = new FormData();
 		formData.append('file', file);
 
@@ -33,14 +33,37 @@
 				const data = await response.json();
 				uploadError = data.error || 'Upload failed';
 				isUploading = false;
-			} else {
-				isUploading = true;
 			}
 		} catch (error) {
 			uploadError = 'An error occurred during upload';
 			isUploading = false;
 		}
 	}
+	async function initial() {
+		const response = await fetch(`${API}/api/book/progress`);
+		const data = await response.json();
+		if (data.progress != 0) {
+			pollProgress();
+		}
+	}
+
+	async function pollProgress() {
+		isUploading = true;
+		try {
+			const response = await fetch(`${API}/api/book/progress`);
+			const data = await response.json();
+			progress = data.progress;
+			if (progress < 100) {
+				// If progress is not complete and uploading is still in progress, continue polling
+				setTimeout(pollProgress, 5000);
+			} else {
+				isUploading = false;
+			}
+		} catch (error) {
+			console.error('Error fetching progress:', error);
+		}
+	}
+	initial();
 </script>
 
 <div class="flex items-center justify-center">
@@ -52,7 +75,14 @@
 			<Plus />
 		</button>
 	{:else}
-		<div>Uploading Book</div>
+		<div class="w-full bg-gray-200 rounded-lg mt-1" style="width:300px">
+			<div
+				class="bg-blue-500 text-xs leading-none py-1 text-center text-white rounded-lg"
+				style="width: {Math.floor(progress)}%"
+			>
+				{Math.floor(progress)}%
+			</div>
+		</div>
 	{/if}
 </div>
 {#if uploadError}

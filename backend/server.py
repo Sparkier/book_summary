@@ -1,7 +1,6 @@
 """Server interface for the latent retrieval demo."""
 
 import json
-import asyncio
 import uuid
 from pathlib import Path
 from flask import Flask, jsonify, send_file, request
@@ -9,6 +8,9 @@ from ebooklib import epub
 from local_inference_client import LocalInferenceClient
 from huggingface_hub import InferenceClient
 from flask_cors import CORS
+from book_summarizer import BookSummarizer
+
+summarizer = BookSummarizer()
 
 app = Flask(__name__)
 app.config.from_pyfile('.flaskenv')
@@ -29,6 +31,7 @@ if "HUGGINGFACE_TOKEN" in app.config:
     inference_client = InferenceClient(token=app.config["HUGGINGFACE_TOKEN"])
 else:
     inference_client = LocalInferenceClient()
+
 
 def allowed_file(filename: str):
     """Check if the file is an epub file
@@ -92,7 +95,8 @@ async def generate_image():
             filename = basefilename.with_stem(f"{basefilename.stem}{counter}")
         output_path = str(filename)
 
-        image = inference_client.text_to_image(text, model="lykon/dreamshaper-8")
+        image = inference_client.text_to_image(
+            text, model="lykon/dreamshaper-8")
         image.save(output_path)
         return jsonify({"message": "Image successfully generated"}), OK_STATUS
 
@@ -132,23 +136,20 @@ async def upload_book():
             book_metadata = {"title": title, "creator": creator}
             with open(folder_path / "metadata.json", "w", encoding="utf8") as file:
                 json.dump(book_metadata, file)
-            summarizer_command = [
-                "python",
-                "book_summarizer.py",
-                "--input_file",
-                str(file_path),
-                "--output_dir",
-                str(folder_path),
-            ]
-            await asyncio.create_subprocess_shell(" ".join(summarizer_command))
-
+            await summarizer.summarize_book(file_path, folder_path)
             return (
                 jsonify({"message": "File successfully uploaded", "title": title}),
                 OK_STATUS,
             )
         return jsonify({"error": "Failed to extract book title"}), ERROR_STATUS
-
     return jsonify({"error": "Invalid file type"}), ERROR_STATUS
+
+
+@app.route("/api/book/progress", methods=["GET"])
+async def get_summarization_progress_route():
+    """Get the summarization progress."""
+    progress_percentage = summarizer.get_summarization_progress()
+    return jsonify({"progress": progress_percentage})
 
 
 @app.route("/api/books", methods=["GET"])
@@ -355,7 +356,8 @@ def get_book_summary_image(book_uuid, version):
     """
 
     filename = DATA_DIR / book_uuid / f"book_summary-version-{version}.png"
-
+    if not filename.exists():
+        return send_file("../frontend/static/EmptyImage.jpg", mimetype="image/png")
     return send_file(filename, mimetype="image/png")
 
 
@@ -377,7 +379,8 @@ def get_chapter_summary_image(book_uuid, chapter: int, version):
         / book_uuid
         / f"chapter-{chapter:03d}_chapter_summary-version-{version}.png"
     )
-
+    if not filename.exists():
+        return send_file("../frontend/static/EmptyImage.jpg", mimetype="image/png")
     return send_file(filename, mimetype="image/png")
 
 
@@ -403,7 +406,8 @@ def get_paragraph_summary_image(book_uuid, chapter: int, paragraph: int, version
         / book_uuid
         / f"chapter-{chapter:03d}_paragraph_summary-{paragraph:04d}-version-{version}.png"
     )
-
+    if not filename.exists():
+        return send_file("../frontend/static/EmptyImage.jpg", mimetype="image/png")
     return send_file(filename, mimetype="image/png")
 
 
@@ -429,7 +433,8 @@ def get_paragraph_image(book_uuid, chapter: int, paragraph: int, version):
         / book_uuid
         / f"chapter-{chapter:03d}_paragraph-{paragraph:04d}-version-{version}.png"
     )
-
+    if not filename.exists():
+        return send_file("../frontend/static/EmptyImage.jpg", mimetype="image/png")
     return send_file(filename, mimetype="image/png")
 
 
