@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
 	import type { SelectedImages } from '$lib/types';
+	import Button from '$lib/elements/Button.svelte';
+	const API = PUBLIC_BACKEND_URL;
 
 	export let src: string;
 	export let text: string;
@@ -12,7 +14,6 @@
 	export let paragraphIndex: number;
 	export let selectedBook: string;
 
-	const API = PUBLIC_BACKEND_URL;
 	let isGenerating = false;
 	let errorMessage = '';
 	let imageVersions = 0;
@@ -196,7 +197,7 @@
 				on:error={() => handleImageError()}
 			/>
 
-			<div class="ml-4 flex flex-col w-full">
+			<div class="ml-4 mr-4 flex flex-col w-full">
 				<div class="overflow-x-auto max-h-24 flex">
 					{#each [...Array(imageVersions)].map((_, index) => index) as version}
 						<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -209,18 +210,20 @@
 						/>
 					{/each}
 				</div>
-				<h3>Prompt:</h3>
-				<textarea on:input={handleTextareaInput} rows="3" class="mt-2 w-full">{prompt}</textarea>
-				<div class="flex">
+				<h2>Prompt:</h2>
+				<textarea on:input={handleTextareaInput} rows="3" class="mt-2 w-full common-input border"
+					>{prompt}</textarea
+				>
+				<div class="flex mt-2">
 					<div>
 						{#if userModifiedPrompt}
-							<button on:click={resetUserModifiedPrompt}> Reset prompt </button>
+							<Button on:click={resetUserModifiedPrompt}>Reset prompt</Button>
 						{/if}
 					</div>
 					<div class="ml-auto">
-						<button disabled={isGenerating} on:click={() => generateImage()}>
+						<Button disabled={isGenerating} on:click={() => generateImage()}>
 							{isGenerating ? 'Generating...' : 'Generate image'}
-						</button>
+						</Button>
 						{#if errorMessage}
 							<p class="text-red-600">{errorMessage}</p>
 						{/if}
@@ -229,9 +232,9 @@
 			</div>
 		</div>
 	{:else}
-		<button disabled={isGenerating} on:click={() => generateImage()} class="m-1">
+		<Button disabled={isGenerating} on:click={() => generateImage()}>
 			{isGenerating ? 'Generating...' : 'Generate image'}
-		</button>
+		</Button>
 		{#if errorMessage}
 			<p class="text-red-600">{errorMessage}</p>
 		{/if}
