@@ -11,6 +11,8 @@ from flask_cors import CORS
 from book_summarizer import BookSummarizer
 
 summarizer = BookSummarizer()
+book_summary_progress = 0
+
 
 app = Flask(__name__)
 app.config.from_pyfile('.flaskenv')
@@ -136,7 +138,10 @@ async def upload_book():
             book_metadata = {"title": title, "creator": creator}
             with open(folder_path / "metadata.json", "w", encoding="utf8") as file:
                 json.dump(book_metadata, file)
-            await summarizer.summarize_book(file_path, folder_path)
+            
+            def uodate_progress(num_processed, total):
+                book_summary_progress = num_processed / total
+            await summarizer.summarize_book(file_path, folder_path, uodate_progress)
             return (
                 jsonify({"message": "File successfully uploaded", "title": title}),
                 OK_STATUS,
@@ -148,8 +153,7 @@ async def upload_book():
 @app.route("/api/book/progress", methods=["GET"])
 async def get_summarization_progress_route():
     """Get the summarization progress."""
-    progress_percentage = summarizer.get_summarization_progress()
-    return jsonify({"progress": progress_percentage})
+    return jsonify({"progress": book_summary_progress})
 
 
 @app.route("/api/books", methods=["GET"])
