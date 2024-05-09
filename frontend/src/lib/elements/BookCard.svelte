@@ -9,13 +9,11 @@
 	style="background: linear-gradient(to right, rgb(60, 13, 20) 3px, rgba(255, 255, 255, 0.5) 5px, rgba(255, 255, 255, 0.25) 7px, rgba(255, 255, 255, 0.25) 10px, transparent 12px, transparent 16px, rgba(255, 255, 255, 0.25) 17px, transparent 22px), url({imageSrc});"
 >
 	<div class="flex-1 flex flex-col justify-between p-2">
-		<h3
-			class="text-xl font-bold text-center tracking-tight text-gray-900 p-1 mx-4 rounded backdrop-blur"
-		>
+		<h3 class="text-xl font-bold text-center tracking-tight text-gray-100 p-1 mx-4 rounded">
 			{title}
 		</h3>
 		{#if creator}
-			<p class="mb-4 text-sm font-medium text-center text-gray-600 p-1 backdrop-blur rounded">
+			<p class="mb-4 text-sm font-medium text-center text-gray-200 p-1 rounded">
 				{creator}
 			</p>
 		{/if}
