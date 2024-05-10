@@ -138,10 +138,10 @@ async def upload_book():
             with open(folder_path / "metadata.json", "w", encoding="utf8") as file:
                 json.dump(book_metadata, file)
 
-            def uodate_progress(num_processed, total):
-                global book_summary_progress
+            def update_progress(num_processed, total):
+                global book_summary_progress # pylint: disable=global-statement
                 book_summary_progress = num_processed / total
-            await summarizer.summarize_book(file_path, folder_path, uodate_progress)
+            await summarizer.summarize_book(file_path, folder_path, update_progress)
             return (
                 jsonify({"message": "File successfully uploaded", "title": title}),
                 OK_STATUS,
