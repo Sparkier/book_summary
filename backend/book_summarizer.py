@@ -64,6 +64,7 @@ class BookSummarizer:
         Returns:
             bool: True if the book is successfully summarized and saved
         """
+        # pylint: disable=too-many-locals
         output_dir.mkdir(parents=True, exist_ok=True)
 
         input_file = Path(input_file)

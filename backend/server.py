@@ -11,7 +11,7 @@ from flask_cors import CORS
 from book_summarizer import BookSummarizer
 
 summarizer = BookSummarizer()
-book_summary_progress = 0
+book_summary_progress = 0 # pylint: disable=invalid-name
 
 app = Flask(__name__)
 app.config.from_pyfile('.flaskenv')
