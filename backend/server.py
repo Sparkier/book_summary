@@ -13,7 +13,6 @@ from book_summarizer import BookSummarizer
 summarizer = BookSummarizer()
 book_summary_progress = 0
 
-
 app = Flask(__name__)
 app.config.from_pyfile('.flaskenv')
 CORS(app)
@@ -138,8 +137,9 @@ async def upload_book():
             book_metadata = {"title": title, "creator": creator}
             with open(folder_path / "metadata.json", "w", encoding="utf8") as file:
                 json.dump(book_metadata, file)
-            
+
             def uodate_progress(num_processed, total):
+                global book_summary_progress
                 book_summary_progress = num_processed / total
             await summarizer.summarize_book(file_path, folder_path, uodate_progress)
             return (
