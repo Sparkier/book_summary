@@ -60,6 +60,8 @@ class BookSummarizer:
             output_dir (str): The path to the output directory where
             the summarized content will be saved. If unspecified,
             the output directory will be the same as the input file's parent directory.
+            progress_callback (Callable[[int, int], None]): Called with number of processed 
+            items and total items as arguments if not None.
 
         Returns:
             bool: True if the book is successfully summarized and saved
@@ -76,7 +78,6 @@ class BookSummarizer:
         book = book_content["book"]
         summarized_book = book
         chapter_summaries = []
-        num_processed = 0
 
         num_paragraphs_per_chapter = [
             len(chapter["paragraphs"]) for chapter in book["chapters"]
@@ -85,21 +86,27 @@ class BookSummarizer:
         num_chapters = len(book["chapters"])
         num_book = 1
         total_to_process = num_book + num_chapters + num_paragraphs
-        if progress_callback:
-            progress_callback(0, total_to_process)
+
+        num_processed = 0
+
+        def increment_progress(inc: int):
+            nonlocal num_processed
+            num_processed += inc
+            if progress_callback:
+                progress_callback(num_processed, total_to_process)
+
+        # Initiate 0% progress
+        increment_progress(0)
+
         for ch_num, chapter in enumerate(book["chapters"]):
             paragraph_summaries = []
 
             for paragraph in chapter["paragraphs"]:
                 paragraph_summaries.append(self.text_summarization(paragraph))
-                num_processed += 1
-                if progress_callback:
-                    progress_callback(num_processed, total_to_process)
+                increment_progress(1)
 
             chapter_summary = self.text_summarization("".join(paragraph_summaries))
-            num_processed += 1
-            if progress_callback:
-                progress_callback(num_processed, total_to_process)
+            increment_progress(1)
 
             summarized_book["chapters"][ch_num][
                 "paragraph_summaries"
@@ -108,9 +115,7 @@ class BookSummarizer:
             chapter_summaries.append(chapter_summary)
 
         book_summary = self.text_summarization("".join(chapter_summaries))
-        num_processed += 1
-        if progress_callback:
-            progress_callback(num_processed, total_to_process)
+        increment_progress(1)
 
         book["book_summary"] = book_summary
         with open(Path(output_dir, "summarized.json"), "w", encoding="utf-8") as f:
@@ -131,17 +136,22 @@ if __name__ == "__main__":
         default=None,
     )
     args = parser.parse_args()
-    t = tqdm(desc="Summarizing book")
+    with tqdm(desc="Summarizing book") as pbar:
 
-    def print_progress(progress, total):
-        """Log progress bar"""
-        if progress == 0:
-            t.reset(total)
-        t.update(progress)
+        def print_progress(progress, total):
+            """Log progress bar"""
+            if progress == 0:
+                pbar.reset(total)
+            else:
+                pbar.update(1)
 
-    Booksummarizer = BookSummarizer()
-    asyncio.run(
-        Booksummarizer.summarize_book(
-            Path(args.input_file), Path(args.output_dir), print_progress
+        out_dir = (
+            Path(args.output_dir) if args.output_dir else Path(args.input_file).parent
         )
-    )
+
+        Booksummarizer = BookSummarizer()
+        asyncio.run(
+            Booksummarizer.summarize_book(
+                Path(args.input_file), out_dir, print_progress
+            )
+        )
