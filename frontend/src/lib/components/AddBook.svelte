@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
 	import { Plus } from 'lucide-svelte';
+	import ProgressBar from '$lib/elements/ProgressBar.svelte';
 
 	const API = PUBLIC_BACKEND_URL;
 	let fileInput: HTMLInputElement;
@@ -76,17 +77,7 @@
 			<Plus />
 		</button>
 	{:else}
-		<div class="w-full bg-gray-200 rounded-lg mt-1" style="width:300px">
-			<div
-				class="bg-blue-500 text-xs leading-none py-1 text-center text-white rounded-lg"
-				style="width: {Math.floor(progress)}%"
-			>
-				{Math.floor(progress)}%
-				{#if progressError}
-					<p class="text-red-600">{progressError}</p>
-				{/if}
-			</div>
-		</div>
+		<ProgressBar {progress} {progressError} width={200} classNames="mt-1" />
 	{/if}
 </div>
 {#if uploadError}
