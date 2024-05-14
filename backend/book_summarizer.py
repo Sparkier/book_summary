@@ -69,11 +69,8 @@ class BookSummarizer:
         # pylint: disable=too-many-locals
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        input_file = Path(input_file)
-        if input_file.suffix == ".json":
-            book_content = util.parse_json(input_file)
-        elif input_file.suffix == ".epub":
-            book_content = util.parse_epub(input_file)
+
+        book_content = util.parse_book(input_file)
 
         book = book_content["book"]
         summarized_book = book

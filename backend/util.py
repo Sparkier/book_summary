@@ -1,5 +1,6 @@
 """Providing utility functitons for the backend."""
 import json
+from pathlib import Path
 
 import ebooklib
 from bs4 import BeautifulSoup
@@ -65,3 +66,18 @@ def parse_epub(path):
     chapters = [parse_chapter(ch_num, chapter) for ch_num, chapter in enumerate(epub_chapters)]
 
     return {"book": {"title": book.get_metadata('DC', 'title')[0][0], "chapters": chapters}}
+
+def parse_book(input_file: Path):
+    """Read json or epub files and return in book as a json object with title and chapters.
+    {"book": 
+        {
+            "title": string, "chapters: [string]
+        }
+    }
+    """
+    if input_file.suffix == ".json":
+        return parse_json(input_file)
+    elif input_file.suffix == ".epub":
+        return parse_epub(input_file)
+    else:
+        raise NotImplementedError(f"Unsupported file type: {input_file.suffix}")
