@@ -8,7 +8,6 @@
 	let isUploading = false;
 	let uploadError = '';
 	let progressError = '';
-	let fileName = '';
 	let progress = 0;
 
 	async function handleFileUpload(event: Event) {
@@ -20,7 +19,6 @@
 		}
 
 		const file = target.files[0];
-		fileName = file.name;
 		uploadError = '';
 		pollProgress();
 		const formData = new FormData();

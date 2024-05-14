@@ -1,4 +1,5 @@
 """Providing utility functitons for the backend."""
+
 import json
 from pathlib import Path
 
@@ -30,12 +31,12 @@ def parse_chapter(ch_num, chapter):
     Returns:
         _type_: _description_
     """
-    soup = BeautifulSoup(chapter.get_body_content(), 'html.parser')
-    headings = soup.find_all('h1')
+    soup = BeautifulSoup(chapter.get_body_content(), "html.parser")
+    headings = soup.find_all("h1")
     if headings:
         title = headings[0].text
     else:
-        headings = soup.find_all('h2')
+        headings = soup.find_all("h2")
         if headings:
             title = headings[0].text
         else:
@@ -45,7 +46,9 @@ def parse_chapter(ch_num, chapter):
     # Extract paragraphs.
     # Some will start/end with newlines (strip fixes this)
     # Some contain '\n     ' (for formating purposes?). Replace those.
-    paragraphs = [para.get_text().replace('\n     ', '').strip() for para in soup.find_all('p')]
+    paragraphs = [
+        para.get_text().replace("\n     ", "").strip() for para in soup.find_all("p")
+    ]
     paragraphs = list(filter(len, paragraphs))
     return {"num": ch_num, "title": chapter.title, "paragraphs": paragraphs}
 
@@ -63,13 +66,18 @@ def parse_epub(path):
 
     items = list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))
     epub_chapters = [item for item in items if item.is_chapter()]
-    chapters = [parse_chapter(ch_num, chapter) for ch_num, chapter in enumerate(epub_chapters)]
+    chapters = [
+        parse_chapter(ch_num, chapter) for ch_num, chapter in enumerate(epub_chapters)
+    ]
 
-    return {"book": {"title": book.get_metadata('DC', 'title')[0][0], "chapters": chapters}}
+    return {
+        "book": {"title": book.get_metadata("DC", "title")[0][0], "chapters": chapters}
+    }
+
 
 def parse_book(input_file: Path):
     """Read json or epub files and return in book as a json object with title and chapters.
-    {"book": 
+    {"book":
         {
             "title": string, "chapters: [string]
         }
@@ -79,5 +87,5 @@ def parse_book(input_file: Path):
         return parse_json(input_file)
     elif input_file.suffix == ".epub":
         return parse_epub(input_file)
-    else:
-        raise NotImplementedError(f"Unsupported file type: {input_file.suffix}")
+
+    raise NotImplementedError(f"Unsupported file type: {input_file.suffix}")
