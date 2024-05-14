@@ -2,7 +2,7 @@
 	import { twMerge } from 'tailwind-merge';
 	export let progress: number;
 	export let progressError: string | undefined = undefined;
-	export let width: number = 200;
+	export let width = 200;
 
 	export let classNames = '';
 </script>
