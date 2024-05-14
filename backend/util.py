@@ -85,7 +85,7 @@ def parse_book(input_file: Path):
     """
     if input_file.suffix == ".json":
         return parse_json(input_file)
-    elif input_file.suffix == ".epub":
+    if input_file.suffix == ".epub":
         return parse_epub(input_file)
 
     raise NotImplementedError(f"Unsupported file type: {input_file.suffix}")
