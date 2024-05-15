@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
 	import { Plus } from 'lucide-svelte';
+	import ProgressBar from '$lib/elements/ProgressBar.svelte';
 
 	const API = PUBLIC_BACKEND_URL;
 	let fileInput: HTMLInputElement;
 	let isUploading = false;
 	let uploadError = '';
-	let fileName = '';
+	let progressError = '';
+	let progress = 0;
 
 	async function handleFileUpload(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -17,10 +19,8 @@
 		}
 
 		const file = target.files[0];
-		fileName = file.name;
-		isUploading = true;
 		uploadError = '';
-
+		pollProgress();
 		const formData = new FormData();
 		formData.append('file', file);
 
@@ -33,14 +33,37 @@
 				const data = await response.json();
 				uploadError = data.error || 'Upload failed';
 				isUploading = false;
-			} else {
-				isUploading = true;
 			}
 		} catch (error) {
 			uploadError = 'An error occurred during upload';
 			isUploading = false;
 		}
 	}
+	async function initial() {
+		const response = await fetch(`${API}/api/book/progress`);
+		const data = await response.json();
+		if (data.progress != 0) {
+			pollProgress();
+		}
+	}
+
+	async function pollProgress() {
+		isUploading = true;
+		try {
+			const response = await fetch(`${API}/api/book/progress`);
+			const data = await response.json();
+			progress = data.progress;
+			if (progress < 100) {
+				// If progress is not complete and uploading is still in progress, continue polling
+				setTimeout(pollProgress, 5000);
+			} else {
+				isUploading = false;
+			}
+		} catch (error) {
+			progressError = 'Error fetching progress:';
+		}
+	}
+	initial();
 </script>
 
 <div class="flex items-center justify-center">
@@ -52,7 +75,7 @@
 			<Plus />
 		</button>
 	{:else}
-		<div>Uploading Book</div>
+		<ProgressBar {progress} {progressError} width={200} classNames="mt-1" />
 	{/if}
 </div>
 {#if uploadError}

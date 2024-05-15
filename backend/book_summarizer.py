@@ -1,70 +1,154 @@
-#! /usr/bin/env python3
-"""Summarize chapters and paragraphs of a book."""
+"""Module for book summarization functionality."""
+
+import asyncio
+from typing import Callable
 import argparse
 import json
 from pathlib import Path
-from transformers import AutoTokenizer
-from transformers import pipeline
-
+from transformers import AutoTokenizer, pipeline
+from tqdm import tqdm
 import util
 
 
-#  Text-to-image model does not support more than 77 tokens (keras_cv.models.StableDiffusion)
-def text_summarization(summarizer, text, min_length=5, max_length=77):
-    """Summarize a given text to a provided length.
-
-    Args:
-        summarizer (Model): the summarization model in use
-        text (string): the text to be summarized
-        min_length (int, optional): the minimal length of the summarization. Defaults to 5.
-        max_length (int, optional): the maximal length of the summarization. Defaults to 77.
-
-    Returns:
-        string: the summarized version of the text
+class BookSummarizer:
     """
-    tokenizer = AutoTokenizer.from_pretrained("sshleifer/distilbart-cnn-12-6")
-    tokens = tokenizer.tokenize(tokenizer.decode(tokenizer.encode(text)))
-    text_len = len(tokens)
-    summary = summarizer(text, min_length=min(min_length, text_len),
-                         max_length=min(text_len, max_length), truncation=True)
-    return summary[0]['summary_text']
+    Summarizes a book given its input file and saves the
+    summarized content to the specified output directory.
+    """
+
+    def __init__(self, model_id="sshleifer/distilbart-cnn-12-6"):
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+        self.summarizer = pipeline("summarization", model=model_id)
+
+    def text_summarization(self, text, min_length=5, max_length=77):
+        """
+        Summarize a given text to a provided length.
+
+        Args:
+            text (string): the text to be summarized
+            min_length (int, optional): the minimal length of the summarization. Defaults to 5.
+            max_length (int, optional): the maximal length of the summarization. Defaults to 77.
+
+        Returns:
+            string: the summarized version of the text
+        """
+        tokens = self.tokenizer.tokenize(
+            self.tokenizer.decode(self.tokenizer.encode(text))
+        )
+        text_len = len(tokens)
+        summary = self.summarizer(
+            text,
+            min_length=min(min_length, text_len),
+            max_length=min(text_len, max_length),
+            truncation=True,
+        )
+        return summary[0]["summary_text"]
+
+    async def summarize_book(
+        self,
+        input_file: Path,
+        output_dir: Path,
+        progress_callback: Callable[[int, int], None] = None,
+    ):
+        """
+        Summarizes a book given its input file and saves the
+        summarized content to the specified output directory.
+
+        Args:
+            input_file (str): The path to the input JSON or EPUB file
+              containing the book content.
+            output_dir (str): The path to the output directory where
+            the summarized content will be saved. If unspecified,
+            the output directory will be the same as the input file's parent directory.
+            progress_callback (Callable[[int, int], None]): Called with number of processed 
+            items and total items as arguments if not None.
+
+        Returns:
+            bool: True if the book is successfully summarized and saved
+        """
+        # pylint: disable=too-many-locals
+        output_dir.mkdir(parents=True, exist_ok=True)
 
 
-if __name__ == '__main__':
+        book_content = util.parse_book(input_file)
+
+        book = book_content["book"]
+        summarized_book = book
+        chapter_summaries = []
+
+        num_paragraphs_per_chapter = [
+            len(chapter["paragraphs"]) for chapter in book["chapters"]
+        ]
+        num_paragraphs = sum(num_paragraphs_per_chapter)
+        num_chapters = len(book["chapters"])
+        num_book = 1
+        total_to_process = num_book + num_chapters + num_paragraphs
+
+        num_processed = 0
+
+        def increment_progress(inc: int):
+            nonlocal num_processed
+            num_processed += inc
+            if progress_callback:
+                progress_callback(num_processed, total_to_process)
+
+        # Initiate 0% progress
+        increment_progress(0)
+
+        for ch_num, chapter in enumerate(book["chapters"]):
+            paragraph_summaries = []
+
+            for paragraph in chapter["paragraphs"]:
+                paragraph_summaries.append(self.text_summarization(paragraph))
+                increment_progress(1)
+
+            chapter_summary = self.text_summarization("".join(paragraph_summaries))
+            increment_progress(1)
+
+            summarized_book["chapters"][ch_num][
+                "paragraph_summaries"
+            ] = paragraph_summaries
+            summarized_book["chapters"][ch_num]["chapter_summary"] = chapter_summary
+            chapter_summaries.append(chapter_summary)
+
+        book_summary = self.text_summarization("".join(chapter_summaries))
+        increment_progress(1)
+
+        book["book_summary"] = book_summary
+        with open(Path(output_dir, "summarized.json"), "w", encoding="utf-8") as f:
+            json.dump({"book": book}, f)
+
+        return True
+
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Summarize book, chapters and paragraphs')
-    parser.add_argument('--input_file', type=str, help='input json/epub file')
-    parser.add_argument('--output_dir', type=str,
-                        help='output dir. Same as input if unspecified', default=None)
+        description="Summarize book, chapters and paragraphs"
+    )
+    parser.add_argument("--input_file", type=str, help="input json/epub file")
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        help="output dir. Same as input if unspecified",
+        default=None,
+    )
     args = parser.parse_args()
-    if args.output_dir is None:
-        output_dir = Path(args.input_file).parent
-    else:
-        output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    with tqdm(desc="Summarizing book") as pbar:
 
-    input_file = Path(args.input_file)
-    if input_file.suffix == ".json":
-        book_content = util.parse_json(input_file)
-    elif input_file.suffix == ".epub":
-        book_content = util.parse_epub(input_file)
+        def print_progress(progress, total):
+            """Log progress bar"""
+            if progress == 0:
+                pbar.reset(total)
+            else:
+                pbar.update(1)
 
-    book = book_content["book"]
-    summarized_book = book
-    MODEL_ID = "sshleifer/distilbart-cnn-12-6"
-    summarization_model = pipeline("summarization", model=MODEL_ID)
-    chapter_summaries = []
-    for ch_num, chapter in enumerate(book["chapters"]):
-        paragraph_summaries = [text_summarization(
-            summarization_model, paragraph) for paragraph in chapter["paragraphs"]]
-        chapter_summary = text_summarization(
-            summarization_model, ''.join(paragraph_summaries))
-        summarized_book["chapters"][ch_num]["paragraph_summaries"] = paragraph_summaries
-        summarized_book["chapters"][ch_num]["chapter_summary"] = chapter_summary
-        chapter_summaries.append(chapter_summary)
+        out_dir = (
+            Path(args.output_dir) if args.output_dir else Path(args.input_file).parent
+        )
 
-    book_summary = text_summarization(
-        summarization_model, ''.join(chapter_summaries))
-    book["book_summary"] = book_summary
-    with open(Path(output_dir, 'summarized.json'), 'w', encoding='utf-8') as f:
-        json.dump({"book": book}, f)
+        Booksummarizer = BookSummarizer()
+        asyncio.run(
+            Booksummarizer.summarize_book(
+                Path(args.input_file), out_dir, print_progress
+            )
+        )

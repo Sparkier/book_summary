@@ -91,8 +91,9 @@
 		//clear old error messages
 		errorMessage = '';
 		isGenerating = true;
-		get_updated_prompt();
-
+		if (!userModifiedPrompt) {
+			get_updated_prompt();
+		}
 		try {
 			const response = await fetch(`${API}/api/image`, {
 				method: 'POST',
@@ -210,7 +211,7 @@
 						/>
 					{/each}
 				</div>
-				<h2>Prompt:</h2>
+				<h3>Prompt:</h3>
 				<textarea on:input={handleTextareaInput} rows="3" class="mt-2 w-full common-input border"
 					>{prompt}</textarea
 				>
