@@ -51,7 +51,7 @@ class BookSummarizer:
             string: the summarized version of the text
         """
         tokens = self.tokenizer.tokenize(text)
-        )
+
         num_tokens = len(tokens)
         summary = self.summarizer(
             text,
