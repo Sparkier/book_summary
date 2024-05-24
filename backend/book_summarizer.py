@@ -10,7 +10,7 @@ from tokenizers import Tokenizer
 import torch.cuda
 from tqdm import tqdm
 
-from semantic_text_splitter import TextSplitter
+from semantic_text_splitter import TextSplitter #pylint: disable=no-name-in-module
 
 import util
 
