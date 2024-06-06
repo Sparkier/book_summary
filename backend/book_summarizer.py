@@ -47,6 +47,8 @@ class BookSummarizer:
             repetition_penalty=3.5,
             num_beams=4,
             early_stopping=True,
+            # Parameters are default from huggingface page: https://huggingface.co/pszemraj/led-base-book-summary
+            # Detailed information about parameters: https://github.com/pszemraj/textsum/wiki/Inference-&-Parameters
         )
         self.min_length = min_length
         self.max_length = max_length
@@ -139,7 +141,9 @@ class BookSummarizer:
 
         for ch_num, chapter in enumerate(book["chapters"]):
             translation_table = dict.fromkeys(map(ord, '\n*\xa0\u2009""'), None)
-            # Clean paragraphs
+            # Clean paragraphs to eleminate strange characters in original text
+            # that are irrelevant for summarization: e.g. multiple new lines,
+            # \xa0 non-breaking space, \u2009 thin space
             clean_paragraphs = [
                 paragraph.translate(translation_table)
                 for paragraph in chapter["paragraphs"]
@@ -163,7 +167,7 @@ class BookSummarizer:
             chapter_summaries.append(chapter_summary)
 
         chapter_summary_chunks: list = self.semantic_text_split(
-            "".join(chapter_summaries), self.summarizer.tokenizer.model_max_length
+            "\n".join(chapter_summaries), self.summarizer.tokenizer.model_max_length
         )
         chapter_chunk_summaries: list = [
             self.text_summarization(chunk) for chunk in chapter_summary_chunks
