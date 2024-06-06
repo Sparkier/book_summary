@@ -15,5 +15,3 @@ diffusers
 flask[async]
 accelerate # Optional, but recommended by diffusers
 # flash-attn # Optional, takes forever to compile, but can improve performance
-semantic-text-splitter
-tqdm # console progress bar

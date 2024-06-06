@@ -140,11 +140,7 @@ async def upload_book():
 
             def update_progress(num_processed, total):
                 global book_summary_progress # pylint: disable=global-statement
-                if num_processed == total:
-                    book_summary_progress = 0
-                else:
-                    book_summary_progress = 100.0 * num_processed / total
-
+                book_summary_progress = 100.0 * num_processed / total
             await summarizer.summarize_book(file_path, folder_path, update_progress)
             return (
                 jsonify({"message": "File successfully uploaded", "title": title}),
