@@ -1,3 +1,6 @@
+# Environment file for backend (HUGGINGFACE_TOKEN="YOUR_TOKEN")
+backend/.flaskenv
+
 # Created by https://www.toptal.com/developers/gitignore/api/python,virtualenv,svelte,node,yarn
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,virtualenv,svelte,node,yarn
 

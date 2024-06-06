@@ -71,9 +71,7 @@ if __name__ == '__main__':
     target_dir = Path(args.output_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    input_file = Path(args.input_file)
-    if input_file.suffix == ".json":
-        book_content = util.parse_json(input_file)
+    book_content = util.parse_book(Path(args.input_file))
     book = book_content["book"]
 
     diffusion_model = keras_cv.models.StableDiffusion(
