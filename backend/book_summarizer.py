@@ -144,6 +144,7 @@ class BookSummarizer:
             # Clean paragraphs to eleminate strange characters in original text
             # that are irrelevant for summarization: e.g. multiple new lines,
             # \xa0 non-breaking space, \u2009 thin space
+
             clean_paragraphs = [
                 paragraph.translate(translation_table)
                 for paragraph in chapter["paragraphs"]
@@ -168,6 +169,7 @@ class BookSummarizer:
 
         chapter_summary_chunks: list = self.semantic_text_split(
             "\n".join(chapter_summaries), self.summarizer.tokenizer.model_max_length
+
         )
         chapter_chunk_summaries: list = [
             self.text_summarization(chunk) for chunk in chapter_summary_chunks
