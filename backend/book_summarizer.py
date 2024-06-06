@@ -47,8 +47,10 @@ class BookSummarizer:
             repetition_penalty=3.5,
             num_beams=4,
             early_stopping=True,
-            # Parameters are default from huggingface page: https://huggingface.co/pszemraj/led-base-book-summary
-            # Detailed information about parameters: https://github.com/pszemraj/textsum/wiki/Inference-&-Parameters
+            # Parameters are default from huggingface page:
+            # https://huggingface.co/pszemraj/led-base-book-summary
+            # Detailed information about parameters:
+            # https://github.com/pszemraj/textsum/wiki/Inference-&-Parameters
         )
         self.min_length = min_length
         self.max_length = max_length
