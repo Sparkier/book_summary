@@ -22,15 +22,15 @@ class BookSummarizer:
     """
 
     def __init__(
-        self, model_id="pszemraj/led-large-book-summary", min_length=32, max_length=77
+        self, model_id="pszemraj/led-large-book-summary", min_length=32, max_length=512
     ):
         """
         Summarize a given text to a provided length.
 
         Args:
             model_id (string): Huggingface model id
-            min_length (int, optional): the minimal length of the summarization. Defaults to 5.
-            max_length (int, optional): the maximal length of the summarization. Defaults to 77.
+            min_length (int, optional): the minimal length of the summarization. Defaults to 32.
+            max_length (int, optional): the maximal length of the summarization. Defaults to 512.
 
         Returns:
             string: the summarized version of the text
@@ -171,7 +171,6 @@ class BookSummarizer:
 
         chapter_summary_chunks: list = self.semantic_text_split(
             "\n".join(chapter_summaries), self.summarizer.tokenizer.model_max_length
-
         )
         chapter_chunk_summaries: list = [
             self.text_summarization(chunk) for chunk in chapter_summary_chunks
