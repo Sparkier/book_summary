@@ -2,6 +2,7 @@
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
 	import type { SelectedImages } from '$lib/types';
 	import Button from '$lib/elements/Button.svelte';
+	import ImageVersion from '$lib/components/editor/ImageVersion.svelte';
 	const API = PUBLIC_BACKEND_URL;
 
 	export let src: string;
@@ -202,11 +203,9 @@
 				<div class="overflow-x-auto max-h-24 flex">
 					{#each [...Array(imageVersions)].map((_, index) => index) as version}
 						<!-- svelte-ignore a11y-click-events-have-key-events -->
-						<img
-							src={`${src}/${version}`}
-							alt="Summary of the text next to it."
-							class="m-1 block max-w-24 max-h-24 cursor-pointer"
-							on:error={() => handleImageError()}
+						<ImageVersion src={`${src}/${version}`}
+							version = {version}
+							selectedVersion = {selectedImageIndex}
 							on:click={() => setSelectedImage(version)}
 						/>
 					{/each}
